@@ -1,4 +1,4 @@
-from langgraph.graph import StateGraph
+from langgraph.graph import StateGraph, END
 from langgraph.graph.message import add_messages
 from typing import Annotated,TypedDict
 from langchain_openai import ChatOpenAI
@@ -20,10 +20,10 @@ Your goal is to ARGUE IN FAVOR of the topic using reasoning or real-world exampl
 - NEVER speak for the Con side.
 - Do not repeat arguments.
 """),
-    HumanMessage(content="Topic: {topic}"),
-    HumanMessage(content="Opponent's last argument: {con_argument}"),
-    ("placeholder", "{chat_history}"),  # Will be filled with message list
-    HumanMessage(content="Now make your case:")
+    ("user", "Topic: {topic}"),  # ✅ Now {topic} will be filled
+    ("user", "Opponent's last argument: {con_argument}"),
+    ("placeholder", "{chat_history}"),
+    ("user", "Now make your case:")
 ])
 
 con_prompt = ChatPromptTemplate.from_messages([
@@ -35,10 +35,10 @@ Your goal is to ARGUE AGAINST the topic by questioning assumptions or showing ri
 - NEVER speak for the Pro side.
 - Avoid emotional language.
 """),
-    HumanMessage(content="Topic: {topic}"),
-    HumanMessage(content="Opponent's last argument: {pro_argument}"),
+    ("user", "Topic: {topic}"),
+    ("user", "Opponent's last argument: {pro_argument}"),
     ("placeholder", "{chat_history}"),
-    HumanMessage(content="Now make your rebuttal:")
+    ("user", "Now make your rebuttal:")
 ])
 
 moderator_prompt = ChatPromptTemplate.from_messages([
@@ -50,11 +50,11 @@ Your job:
 3. Declare a winner based on logic and evidence.
 4. Use a fair, professional tone.
 """),
-    HumanMessage(content="Topic: {topic}"),
-    HumanMessage(content="Pro's final argument: {pro_argument}"),
-    HumanMessage(content="Con's final argument: {con_argument}"),
+    ("user", "Topic: {topic}"),
+    ("user", "Pro's final argument: {pro_argument}"),
+    ("user", "Con's final argument: {con_argument}"),
     ("placeholder", "{chat_history}"),
-    HumanMessage(content="Now deliver your verdict:")
+    ("user", "Now deliver your verdict:")
 ])
 
 pro_chain = pro_prompt | llm
@@ -77,9 +77,12 @@ def pro_node(state: DebateState) -> DebateState:
         "con_argument": state.get("con_argument", "No prior argument."),
         "chat_history": state["chat_history"][-4:]
     })
+    print("Pro's Argument:\n", result.content)
     return {
         "pro_argument": result.content,
-        "chat_history": [HumanMessage(content=result.content)]
+        "chat_history": [HumanMessage(content=result.content)],
+        "current_speaker": "con",
+        "round": state["round"] + 1
     }
 
 def con_node(state: DebateState) -> DebateState:
@@ -88,9 +91,12 @@ def con_node(state: DebateState) -> DebateState:
         "pro_argument": state.get("pro_argument", "No prior argument."),
         "chat_history": state["chat_history"][-4:]
     })
+    print("Con's Argument:\n", result.content)
     return {
         "con_argument": result.content,
-        "chat_history": [HumanMessage(content=result.content)]
+        "chat_history": [HumanMessage(content=result.content)],
+        "current_speaker": "pro",
+        "round": state["round"] + 1
     }
 def moderator_node(state: DebateState) -> DebateState:
     result = moderator_chain.invoke({
@@ -99,6 +105,50 @@ def moderator_node(state: DebateState) -> DebateState:
         "con_argument": state.get("con_argument", "No prior argument."),
         "chat_history": state["chat_history"][-4:]
     })
+    print("Moderator's Verdict:\n", result.content)
     return {
         "chat_history": [HumanMessage(content=result.content)]
     }
+
+graph = StateGraph(DebateState)
+graph.add_node("pro", pro_node)
+graph.add_node("con", con_node)
+graph.add_node("moderator", moderator_node)
+
+graph.set_entry_point("pro")
+
+def route_speaker(state):
+    if(state["round"] > state["max_rounds"]):
+        return "moderator"
+    if(state["current_speaker"] == "pro"):
+        return "pro"
+    elif state["current_speaker"] == "con":
+        return "con"
+    else:
+        return "moderator"
+
+# Use conditional edge from a "router" step
+graph.add_conditional_edges(
+    source="pro",  # After pro speaks
+    path=route_speaker
+)
+graph.add_conditional_edges(
+    source="con",  # After con speaks
+    path=route_speaker
+)
+graph.add_conditional_edges(
+    source="moderator",
+    path=lambda x: END  # Moderator ends the flow
+)
+
+app = graph.compile()
+
+result = app.invoke({
+    "topic": "The impact of AI on society",
+    "chat_history": [],
+    "pro_argument": "",
+    "con_argument": "",
+    "current_speaker": "pro",
+    "round": 0,
+    "max_rounds": 3
+})
