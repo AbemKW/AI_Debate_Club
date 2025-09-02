@@ -81,4 +81,24 @@ def pro_node(state: DebateState) -> DebateState:
         "pro_argument": result.content,
         "chat_history": [HumanMessage(content=result.content)]
     }
-    
+
+def con_node(state: DebateState) -> DebateState:
+    result = con_chain.invoke({
+        "topic": state["topic"],
+        "pro_argument": state.get("pro_argument", "No prior argument."),
+        "chat_history": state["chat_history"][-4:]
+    })
+    return {
+        "con_argument": result.content,
+        "chat_history": [HumanMessage(content=result.content)]
+    }
+def moderator_node(state: DebateState) -> DebateState:
+    result = moderator_chain.invoke({
+        "topic": state["topic"],
+        "pro_argument": state.get("pro_argument", "No prior argument."),
+        "con_argument": state.get("con_argument", "No prior argument."),
+        "chat_history": state["chat_history"][-4:]
+    })
+    return {
+        "chat_history": [HumanMessage(content=result.content)]
+    }
