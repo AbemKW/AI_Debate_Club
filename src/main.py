@@ -13,7 +13,7 @@ graph.add_node("moderator", moderator_node)
 graph.set_entry_point("pro")
 
 def route_speaker(state):
-    if(state["round"] > state["max_rounds"]):
+    if(state["round"] >= state["max_rounds"]):
         return "moderator"
     if(state["current_speaker"] == "pro"):
         return "pro"
@@ -37,7 +37,6 @@ graph.add_conditional_edges(
 )
 
 app = graph.compile()
-
 result = app.invoke({
     "topic": "The impact of AI on society",
     "chat_history": [],

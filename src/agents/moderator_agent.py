@@ -29,7 +29,7 @@ def moderator_node(state: DebateState) -> DebateState:
         "con_argument": state.get("con_argument", "No prior argument."),
         "chat_history": state["chat_history"][-4:]
     })
-    print("Moderator's Verdict:\n", result.content)
+    print("\nModerator's Verdict:", result.content)
     return {
         "chat_history": [HumanMessage(content=result.content)]
     }

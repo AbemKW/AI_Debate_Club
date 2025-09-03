@@ -26,7 +26,7 @@ def pro_node(state: DebateState) -> DebateState:
         "con_argument": state.get("con_argument", "No prior argument."),
         "chat_history": state["chat_history"][-4:]
     })
-    print("Pro's Argument:\n", result.content)
+    print("\nPro's Argument:", result.content)
     return {
         "pro_argument": result.content,
         "chat_history": [HumanMessage(content=result.content)],
