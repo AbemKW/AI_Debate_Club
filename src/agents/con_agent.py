@@ -1,15 +1,7 @@
-from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage
+from llm import llm
 from debate_state import DebateState
-
-llm = ChatOpenAI(
-    base_url="http://localhost:1234/v1",
-    api_key="none",
-    model="qwen/qwen3-4b"
-)
-
-
 
 con_prompt = ChatPromptTemplate.from_messages([
     SystemMessage(content="""
