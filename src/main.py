@@ -37,12 +37,4 @@ graph.add_conditional_edges(
 )
 
 app = graph.compile()
-result = app.invoke({
-    "topic": "The impact of AI on society",
-    "chat_history": [],
-    "pro_argument": "",
-    "con_argument": "",
-    "current_speaker": "pro",
-    "round": 0,
-    "max_rounds": 3
-})
+
