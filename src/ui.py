@@ -12,17 +12,55 @@ def run_debate(topic, max_rounds):
         "pro_argument": "",
         "con_argument": "",
         "current_speaker": "pro",
-        "round": 0,
+        "round": 1,
         "max_rounds": int(max_rounds)
     }
-    result = app.invoke(state)
-    return str(result)
+    debate_text = f"🎯 **Debate Topic:** {topic}\n"
+    debate_text += f"📊 **Number of Rounds:** {max_rounds}\n"
+    debate_text += "=" * 50 + "\n\n"
+    
+    # Track previous state to detect changes
+    prev_pro_arg = ""
+    prev_con_arg = ""
+    prev_round = 0
+    
+    # Use app.stream instead of app.invoke
+    for step in app.stream(state, stream_mode="values"):
+        # step is a dict with the current state
+        current_round = step.get("round", 1)
+        current_pro = step.get("pro_argument", "")
+        current_con = step.get("con_argument", "")
+        
+        # Check if Pro made a new argument
+        if current_pro and current_pro != prev_pro_arg:
+            debate_text += f"🔵 **Pro's Argument (Round {current_round}):**\n{current_pro}\n\n"
+            prev_pro_arg = current_pro
+            yield debate_text
+        
+        # Check if Con made a new argument  
+        if current_con and current_con != prev_con_arg:
+            debate_text += f"🔴 **Con's Argument (Round {current_round}):**\n{current_con}\n\n"
+            prev_con_arg = current_con
+            yield debate_text
+        
+        # Check if we've reached the end (moderator verdict)
+        chat_history = step.get("chat_history", [])
+        if chat_history and current_round >= int(max_rounds) and len(chat_history) > 0:
+            # This should be the moderator's verdict
+            last_message = chat_history[-1]
+            if hasattr(last_message, 'content'):
+                debate_text += f"⚖️ **Moderator's Verdict:**\n{last_message.content}\n\n"
+                debate_text += "=" * 50 + "\n🏁 **Debate Complete!**"
+                yield debate_text
+                break
+    
+    yield debate_text
 
 with gr.Blocks() as demo:
     gr.Markdown("# AI Debate Club")
     topic = gr.Textbox(label="Debate Topic", value="The impact of AI on society")
-    max_rounds = gr.Number(label="Number of Rounds", value=3)
-    output = gr.Textbox(label="Debate Result")
+    max_rounds = gr.Number(label="Number of Rounds", value=3, precision=0)
+    output = gr.Textbox(label="Debate Result", interactive=True)
     btn = gr.Button("Start Debate")
     btn.click(run_debate, inputs=[topic, max_rounds], outputs=output)
 
