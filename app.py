@@ -68,7 +68,7 @@ with gr.Blocks() as demo:
     ok = health_check()
     status_color = "green" if ok else "red"
     gr.Markdown(
-        f"<div style='border-left:4px solid {status_color}; padding:8px;'>LLM health: {msg}</div>",
+        f"<div style='border-left:4px solid {status_color}; padding:8px;'>LLM health: {ok}</div>",
         elem_id="health",
         visible=True,
     )
