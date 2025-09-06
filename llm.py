@@ -13,10 +13,30 @@ DEFAULT_MODEL = os.environ.get(
     "Qwen/Qwen2.5-7B-Instruct",  # Fallback to a widely available instruct model
 )
 
+HF_TOKEN = os.environ.get("HF_TOKEN")
+if not HF_TOKEN:
+    # Make missing token obvious at startup in Space logs
+    raise RuntimeError(
+        "HF_TOKEN is not set. Add it in your Hugging Face Space: Settings -> Repository secrets -> HF_TOKEN."
+    )
+
 llm = ChatOpenAI(
     base_url=HF_ROUTER_BASE_URL,
-    api_key=os.environ.get("HF_TOKEN", ""),
+    api_key=HF_TOKEN,
     model=DEFAULT_MODEL,
     streaming=True,
     temperature=0.7,
 )
+
+def health_check() -> tuple[bool, str]:
+    """Run a tiny test call to verify router + token + model work.
+
+    Returns (ok, message).
+    """
+    try:
+        # Use the minimal LC chat interface
+        resp = llm.invoke("ping")
+        txt = getattr(resp, "content", None) or str(resp)
+        return True, f"LLM OK (model={DEFAULT_MODEL}). Sample: {txt[:80]}"  # limit output
+    except Exception as e:
+        return False, f"LLM ERROR (model={DEFAULT_MODEL}): {e}"
