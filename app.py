@@ -65,7 +65,7 @@ def run_debate(topic, max_rounds):
 
 with gr.Blocks() as demo:
     gr.Markdown("# AI Debate Club")
-    ok, msg = health_check()
+    ok = health_check()
     status_color = "green" if ok else "red"
     gr.Markdown(
         f"<div style='border-left:4px solid {status_color}; padding:8px;'>LLM health: {msg}</div>",
