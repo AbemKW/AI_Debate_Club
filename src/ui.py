@@ -53,7 +53,6 @@ def run_debate(topic, max_rounds):
                 debate_text += "=" * 50 + "\n🏁 **Debate Complete!**"
                 yield debate_text
                 break
-    
     yield debate_text
 
 with gr.Blocks() as demo:
