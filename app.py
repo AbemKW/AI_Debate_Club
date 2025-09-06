@@ -3,7 +3,7 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import gradio as gr
-from main import app
+from graph import graph_app
 
 def run_debate(topic, max_rounds):
     state = {
@@ -25,7 +25,7 @@ def run_debate(topic, max_rounds):
     prev_round = 0
     
     # Use app.stream instead of app.invoke
-    for step in app.stream(state, stream_mode="values"):
+    for step in graph_app.stream(state, stream_mode="values"):
         # step is a dict with the current state
         current_round = step.get("round", 1)
         current_pro = step.get("pro_argument", "")

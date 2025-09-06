@@ -36,4 +36,4 @@ graph.add_conditional_edges(
     path=lambda x: END  # Moderator ends the flow
 )
 
-app = graph.compile()
+graph_app = graph.compile()
