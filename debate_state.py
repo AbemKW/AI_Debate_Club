@@ -10,3 +10,4 @@ class DebateState(TypedDict):
     chat_history: Annotated[list[BaseMessage], add_messages]
     round: int
     max_rounds: int
+    moderator_verdict: str

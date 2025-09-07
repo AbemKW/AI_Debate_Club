@@ -45,15 +45,12 @@ def run_debate(topic, max_rounds):
                 yield debate_text
 
             # Check if we've reached the end (moderator verdict)
-            chat_history = step.get("chat_history", [])
-            if chat_history and current_round >= max_rounds and len(chat_history) > 0:
-                # This should be the moderator's verdict
-                last_message = chat_history[-1]
-                if hasattr(last_message, 'content'):
-                    debate_text += f"⚖️ **Moderator's Verdict:**\n{last_message.content}\n\n"
-                    debate_text += "=" * 50 + "\n🏁 **Debate Complete!**"
-                    yield debate_text
-                    break
+            moderator_verdict = step.get("moderator_verdict", None)
+            if moderator_verdict and current_round >= max_rounds:
+                debate_text += f"⚖️ **Moderator's Verdict:**\n{moderator_verdict}\n\n"
+                debate_text += "=" * 50 + "\n🏁 **Debate Complete!**"
+                yield debate_text
+                break
     except Exception as e:
         # Also print to Space logs
         print("LLM/graph error:", repr(e))

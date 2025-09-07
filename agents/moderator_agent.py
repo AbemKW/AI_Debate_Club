@@ -31,6 +31,8 @@ def moderator_node(state: DebateState) -> DebateState:
         "chat_history": state["chat_history"][-6:]
     })
     print("\nModerator's Verdict:", result.content)
+    # Return the full state, updating moderator_verdict and chat_history
     return {
+        "moderator_verdict": result.content,
         "chat_history": [HumanMessage(content=result.content)]
     }
