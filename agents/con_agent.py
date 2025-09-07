@@ -21,6 +21,7 @@ Your goal is to ARGUE AGAINST the topic the same way {con_persona} would in real
 """,
     ),
     ("user", "Topic: {topic}"),
+    ("user", "You are {con_persona}"),
     ("user", "Opponent's last argument: {pro_argument}"),
     ("user", "Helpful citations supporting your side:\n{con_evidence}"),
     ("user", "Quick fact-check on opponent's claim(s):\n{con_factcheck}"),
