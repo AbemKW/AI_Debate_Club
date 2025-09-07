@@ -4,3 +4,4 @@ langgraph>=0.2.16
 langchain-openai>=0.2.0
 openai>=1.40.3
 pydantic>=2.7.0
+langchain-groq>=0.1.5
