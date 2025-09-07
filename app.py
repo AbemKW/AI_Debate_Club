@@ -162,13 +162,13 @@ st.markdown(
     """
     <style>
       .chat-wrapper { max-width: 900px; margin: 0 auto; }
-    .msg { display: flex; margin: 8px 0; align-items: flex-end; }
-    .msg.pro { justify-content: flex-end; flex-direction: row-reverse; }
-      .msg.con { justify-content: flex-start; }
+    .msg { display: flex; margin: 8px 0; }
+    .msg.pro { justify-content: flex-end;}
+    .msg.con { justify-content: flex-start; }
     .avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; margin: 0 8px; }
     .bubble { max-width: 70%; padding: 10px 14px; border-radius: 16px; line-height: 1.35; font-size: 0.97rem; }
-    .pro .bubble { background: #ffebee; border: 1px solid #ffcdd2; color: #b71c1c; font-weight: 700; }
-    .con .bubble { background: #e3f2fd; border: 1px solid #bbdefb; color: #0d47a1; font-weight: 700; }
+    .pro .bubble { background: #ffebee; border: 1px solid #ffcdd2; color: #b71c1c; font-weight: 500; }
+    .con .bubble { background: #e3f2fd; border: 1px solid #bbdefb; color: #0d47a1; font-weight: 500; }
     .pro .avatar { background: #ffcdd2; color: #b71c1c; }
     .con .avatar { background: #bbdefb; color: #0d47a1; }
       .meta { font-size: 0.75rem; opacity: 0.7; margin: 0 8px; }
@@ -183,7 +183,7 @@ st.markdown(
 st.markdown(
     """
     <div class="chat-wrapper">
-    <div class="meta">🔴 Pro on the right • 🔵 Con on the left • ⚖️ Moderator centered</div>
+    <div class="meta">Debate</div>
     </div>
     """,
     unsafe_allow_html=True,
