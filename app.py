@@ -78,7 +78,13 @@ def personas_for_style(style: str) -> tuple[str, str]:
     return ("Academic Scholar", "Skeptical Ethicist")
 
 
-def run_real_debate(topic: str, max_rounds: int, pro_persona: str, con_persona: str) -> bool:
+def run_real_debate(
+    topic: str,
+    max_rounds: int,
+    pro_persona: str,
+    con_persona: str,
+    chat_placeholder=None,
+) -> bool:
     """Run the actual LangGraph debate. Returns True if successful, else False.
 
     This mirrors the previous Gradio implementation but renders directly into the
@@ -126,6 +132,8 @@ def run_real_debate(topic: str, max_rounds: int, pro_persona: str, con_persona: 
                 turn_idx += 1
                 st.session_state.transcript.append({"round": turn_idx, "pro": current_pro, "con": ""})
                 st.session_state.chat_messages.append({"speaker": "pro", "content": current_pro})
+                if chat_placeholder is not None:
+                    render_chat(chat_placeholder)
 
             if current_con and current_con != prev_con:
                 prev_con = current_con
@@ -136,11 +144,15 @@ def run_real_debate(topic: str, max_rounds: int, pro_persona: str, con_persona: 
                     turn_idx += 1
                     st.session_state.transcript.append({"round": turn_idx, "pro": "", "con": current_con})
                 st.session_state.chat_messages.append({"speaker": "con", "content": current_con})
+                if chat_placeholder is not None:
+                    render_chat(chat_placeholder)
 
             moderator_verdict = step.get("moderator_verdict")
             if moderator_verdict and current_round >= int(max_rounds):
                 st.session_state.moderator_verdict = moderator_verdict
                 st.session_state.chat_messages.append({"speaker": "moderator", "content": moderator_verdict})
+                if chat_placeholder is not None:
+                    render_chat(chat_placeholder)
                 st.toast("Debate complete. Moderator issued a verdict.")
                 break
             # Gentle pacing to avoid log spam in Spaces
@@ -190,6 +202,36 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# Placeholder to support live, incremental rendering
+chat_placeholder = st.empty()
+
+
+def render_chat(placeholder):
+    """Render the current chat state into the given placeholder."""
+    with placeholder.container():
+        st.markdown("<div class='chat-wrapper'>", unsafe_allow_html=True)
+        for msg in st.session_state.chat_messages:
+            role = msg.get("speaker", "")
+            content = msg.get("content", "")
+            if role == "moderator":
+                st.markdown(
+                    f"<div class='moderator'><div class='bubble'><strong>⚖️ Moderator:</strong> {content}</div></div>",
+                    unsafe_allow_html=True,
+                )
+            elif role == "pro":
+                st.markdown(
+                    f"<div class='msg pro'><div class='avatar'>🔵</div><div class='bubble'>{content}</div></div>",
+                    unsafe_allow_html=True,
+                )
+            else:  # con
+                st.markdown(
+                    f"<div class='msg con'><div class='avatar'>🔴</div><div class='bubble'>{content}</div></div>",
+                    unsafe_allow_html=True,
+                )
+        st.markdown("</div>", unsafe_allow_html=True)
+        if st.session_state.moderator_verdict:
+            st.success("Moderator's decision: " + st.session_state.moderator_verdict)
+
 
 # If user clicks the button, try real debate then fall back
 if start:
@@ -197,38 +239,21 @@ if start:
     st.session_state.chat_messages = []
     st.session_state.transcript = []
     st.session_state.moderator_verdict = ""
-    success = run_real_debate(topic, max_rounds, pro_persona, con_persona)
+    chat_placeholder.empty()
+    success = run_real_debate(topic, max_rounds, pro_persona, con_persona, chat_placeholder=chat_placeholder)
     if not success:
         # Placeholder fallback: simple alternating messages and a mock verdict
         for i in range(1, int(max_rounds) + 1):
             st.session_state.chat_messages.append({"speaker": "pro", "content": f"[Round {i}] ({pro_persona or 'Pro'}) In favor: AI can enhance learning with personalization."})
+            render_chat(chat_placeholder)
+            time.sleep(0.08)
             st.session_state.chat_messages.append({"speaker": "con", "content": f"[Round {i}] ({con_persona or 'Con'}) Against: Over-reliance on AI risks empathy and equity."})
+            render_chat(chat_placeholder)
+            time.sleep(0.08)
         st.session_state.moderator_verdict = "After weighing clarity, evidence, and relevance, the Con side narrowly wins due to stronger risk analysis."
         st.session_state.chat_messages.append({"speaker": "moderator", "content": st.session_state.moderator_verdict})
+        render_chat(chat_placeholder)
     st.session_state.mode = "Real" if success else "Placeholder"
-
-# Render chat-style transcript
-st.markdown("<div class='chat-wrapper'>", unsafe_allow_html=True)
-for msg in st.session_state.chat_messages:
-    role = msg.get("speaker", "")
-    content = msg.get("content", "")
-    if role == "moderator":
-        st.markdown(
-            f"<div class='moderator'><div class='bubble'><strong>⚖️ Moderator:</strong> {content}</div></div>",
-            unsafe_allow_html=True,
-        )
-    elif role == "pro":
-        st.markdown(
-            f"<div class='msg pro'><div class='avatar'>🔵</div><div class='bubble'>{content}</div></div>",
-            unsafe_allow_html=True,
-        )
-    else:  # con
-        st.markdown(
-            f"<div class='msg con'><div class='avatar'>🔴</div><div class='bubble'>{content}</div></div>",
-            unsafe_allow_html=True,
-        )
-st.markdown("</div>", unsafe_allow_html=True)
-
-# If a verdict exists, pin a subtle summary at the bottom
-if st.session_state.moderator_verdict:
-    st.success("Moderator's decision: " + st.session_state.moderator_verdict)
+else:
+    # On initial load (or after rerun without click), render current state if any
+    render_chat(chat_placeholder)
