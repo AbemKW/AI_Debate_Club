@@ -1,4 +1,3 @@
-
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -6,18 +5,28 @@ import gradio as gr
 from graph import graph_app
 from llm import health_check
 
+
+def set_round(max_rounds):
+    try:
+        # Avoid shadowing the built-in 'round'
+        num_rounds = int(max_rounds) + 1
+        return num_rounds
+    except ValueError:
+        return 3  # Default value if conversion fails
+
 def run_debate(topic, max_rounds):
+    num_rounds = set_round(max_rounds)
     state = {
         "topic": topic,
         "chat_history": [],
         "pro_argument": "",
         "con_argument": "",
         "current_speaker": "pro",
-        "round": 1,
-        "max_rounds": int(max_rounds)
+        "round": num_rounds,
+        "max_rounds": num_rounds
     }
     debate_text = f"🎯 **Debate Topic:** {topic}\n"
-    debate_text += f"📊 **Number of Rounds:** {max_rounds}\n"
+    debate_text += f"📊 **Number of Rounds:** {num_rounds}\n"
     debate_text += "=" * 50 + "\n\n"
     
     # Track previous state to detect changes
@@ -47,7 +56,7 @@ def run_debate(topic, max_rounds):
 
             # Check if we've reached the end (moderator verdict)
             chat_history = step.get("chat_history", [])
-            if chat_history and current_round >= int(max_rounds) and len(chat_history) > 0:
+            if chat_history and current_round >= num_rounds and len(chat_history) > 0:
                 # This should be the moderator's verdict
                 last_message = chat_history[-1]
                 if hasattr(last_message, 'content'):
