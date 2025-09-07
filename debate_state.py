@@ -11,3 +11,5 @@ class DebateState(TypedDict):
     round: int
     max_rounds: int
     moderator_verdict: str
+    pro_persona: str
+    con_persona: str

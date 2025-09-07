@@ -5,7 +5,7 @@ import gradio as gr
 from graph import graph_app
 from llm import health_check
 
-def run_debate(topic, max_rounds):
+def run_debate(topic, max_rounds, pro_persona, con_persona):
     state = {
         "topic": topic,
         "chat_history": [],
@@ -13,7 +13,9 @@ def run_debate(topic, max_rounds):
         "con_argument": "",
         "current_speaker": "pro",
         "round": 0,
-        "max_rounds": max_rounds
+        "max_rounds": max_rounds,
+        "pro_persona": pro_persona,
+        "con_persona": con_persona
     }
     debate_text = f"🎯 **Debate Topic:** {topic}\n"
     debate_text += f"📊 **Number of Rounds:** {max_rounds}\n"
@@ -40,7 +42,7 @@ def run_debate(topic, max_rounds):
 
             # Check if Con made a new argument  
             if current_con and current_con != prev_con_arg:
-                debate_text += f"🔴 **Con's Argument (Round {current_round + 1}):**\n{current_con}\n\n"
+                debate_text += f"🔴 **Con's Argument (Round {current_round}):**\n{current_con}\n\n"
                 prev_con_arg = current_con
                 yield debate_text
 
@@ -70,8 +72,10 @@ with gr.Blocks() as demo:
     )
     topic = gr.Textbox(label="Debate Topic", value="The impact of AI on society")
     max_rounds = gr.Number(label="Number of Rounds", value=3, precision=0)
+    pro_persona = gr.Textbox(label="Pro Agent Persona (e.g., Donald Trump)", value="Donald Trump")
+    con_persona = gr.Textbox(label="Con Agent Persona (e.g., Joe Biden)", value="Joe Biden")
     output = gr.Textbox(label="Debate Result", interactive=True)
     btn = gr.Button("Start Debate")
-    btn.click(run_debate, inputs=[topic, max_rounds], outputs=output)
+    btn.click(run_debate, inputs=[topic, max_rounds, pro_persona, con_persona], outputs=output)
 
 demo.launch()

@@ -5,13 +5,12 @@ from debate_state import DebateState
 
 pro_prompt = ChatPromptTemplate.from_messages([
     SystemMessage(content="""
-You are PRO_AGENT, a confident and logical debater.
-Your goal is to ARGUE IN FAVOR of the topic using reasoning or real-world examples.
+You are PRO_AGENT, a confident and logical debater. For this debate, you must roleplay as: {pro_persona}.
+Your goal is to ARGUE IN FAVOR of the topic using reasoning or real-world examples, in the style and persona of {pro_persona}.
 - Respond directly to the opponent's last point.
 - Keep responses under 3 sentences.
 - NEVER speak for the Con side.
 - Do not repeat arguments.
-
 """),
     ("user", "Topic: {topic}"),
     ("user", "Opponent's last argument: {con_argument}"),
@@ -25,7 +24,8 @@ def pro_node(state: DebateState) -> DebateState:
     result = pro_chain.invoke({
         "topic": state["topic"],
         "con_argument": state.get("con_argument", "No prior argument."),
-        "chat_history": state["chat_history"][-4:]
+        "chat_history": state["chat_history"][-4:],
+        "pro_persona": state.get("pro_persona", "")
     })
     print("\nPro's Argument:", result.content)
     return {

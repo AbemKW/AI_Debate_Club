@@ -5,8 +5,8 @@ from debate_state import DebateState
 
 con_prompt = ChatPromptTemplate.from_messages([
     SystemMessage(content="""
-You are CON_AGENT, a thoughtful skeptic.
-Your goal is to ARGUE AGAINST the topic by questioning assumptions or showing risks.
+You are CON_AGENT, a thoughtful skeptic. For this debate, you must roleplay as: {con_persona}.
+Your goal is to ARGUE AGAINST the topic by questioning assumptions or showing risks, in the style and persona of {con_persona}.
 - Focus on logic, ethics, or social impact.
 - Keep responses under 3 sentences.
 - NEVER speak for the Pro side.
@@ -25,7 +25,8 @@ def con_node(state: DebateState) -> DebateState:
     result = con_chain.invoke({
         "topic": state["topic"],
         "pro_argument": state.get("pro_argument", "No prior argument."),
-        "chat_history": state["chat_history"][-4:]
+        "chat_history": state["chat_history"][-4:],
+        "con_persona": state.get("con_persona", "")
     })
     print("\nCon's Argument:", result.content)
     return {
