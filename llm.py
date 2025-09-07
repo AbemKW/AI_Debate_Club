@@ -9,9 +9,8 @@ if not HF_TOKEN:
     )
 
 llm = ChatGroq(
-        base_url="https://api.groq.com/openai/v1/chat/completions",
         api_key=HF_TOKEN,
-        model="deepseek-ai/DeepSeek-V3-0324:together",
+        model="llama-3.3-70b-versatile",
         streaming=True,
         temperature=0.7,
     )
