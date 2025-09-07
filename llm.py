@@ -10,7 +10,7 @@ if not HF_TOKEN:
 
 llm = ChatGroq(
         api_key=HF_TOKEN,
-        model="qwen/qwen3-32b",
+        model="groq/compound",
         streaming=True,
         temperature=0.7,
     )

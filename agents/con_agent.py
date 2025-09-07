@@ -21,7 +21,7 @@ Rules:
 - Avoid fallacies and unnecessary rhetoric; keep it precise.
 
 Style:
-- Use brief signposting ("Offense:", "Defense:", "Weighing:").
+- Summarize with brief signposting ("Offense:", "Defense:", "Weighing:").
 - Be concise but substantive (about 120–180 words).
 """),
     ("user", "Topic: {topic}"),

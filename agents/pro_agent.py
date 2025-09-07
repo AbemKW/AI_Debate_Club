@@ -21,7 +21,7 @@ Rules:
 - Avoid fallacies and repetition; keep the tone professional.
 
 Style:
-- Use brief signposting ("Offense:", "Defense:", "Weighing:").
+- Summarize with brief signposting ("Offense:", "Defense:", "Weighing:").
 - Be concise but substantive (about 120–180 words).
 """),
     ("user", "Topic: {topic}"),

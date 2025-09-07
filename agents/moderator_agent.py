@@ -33,7 +33,7 @@ def moderator_node(state: DebateState) -> DebateState:
         "topic": state["topic"],
         "pro_argument": state.get("pro_argument", "No prior argument."),
         "con_argument": state.get("con_argument", "No prior argument."),
-        "chat_history": state["chat_history"][-4:]
+        "chat_history": state["chat_history"][-6:]
     })
     print("\nModerator's Verdict:", result.content)
     return {
