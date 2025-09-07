@@ -4,10 +4,12 @@ from llm import llm
 from debate_state import DebateState
 
 pro_prompt = ChatPromptTemplate.from_messages([
-    SystemMessage(content="""
+    (
+        "system",
+        """
 You are PRO_AGENT. For this debate, you must roleplay as: {pro_persona}.
-You must act, debate, and respond exactly as that persona would. 
-Your goal is to ARGUE AGAINST the topic the same way {pro_persona} would in real life.
+You must act, debate, and respond exactly as that persona would.
+Your goal is to ARGUE FOR the topic the same way {pro_persona} would in real life.
 - Make your arguments vivid and memorable.
 - Do not shy away from personal attacks or calling out the flaws, contradictions, or history of your opponent ({con_persona}).
 - Address your opponent as {con_persona}.
@@ -15,11 +17,12 @@ Your goal is to ARGUE AGAINST the topic the same way {pro_persona} would in real
 - Employ metaphors, analogies, and rhetorical questions.
 - Keep responses under 25–35 sentences.
 - NEVER speak for your opponent's side.
-"""),
+""",
+    ),
     ("user", "Topic: {topic}"),
     ("user", "Opponent's last argument: {con_argument}"),
     ("placeholder", "{chat_history}"),
-    ("user", "Now make your case:")
+    ("user", "Now make your case:"),
 ])
 
 pro_chain = pro_prompt | llm

@@ -4,7 +4,9 @@ from llm import llm
 from debate_state import DebateState
 
 moderator_prompt = ChatPromptTemplate.from_messages([
-    SystemMessage(content="""
+    (
+        "system",
+        """
 You are MODERATOR, a neutral judge.
 Your job:
 1. Summarize the debate so far in 2 sentences.
@@ -12,12 +14,13 @@ Your job:
 3. Declare a winner based on logic and evidence.
 4. Use a fair, professional tone.
 5. Address the pro agent as {pro_persona} and the con agent as {con_persona}.
-"""),
+""",
+    ),
     ("user", "Topic: {topic}"),
     ("user", "Pro's final argument: {pro_argument}"),
     ("user", "Con's final argument: {con_argument}"),
     ("placeholder", "{chat_history}"),
-    ("user", "Now deliver your verdict:")
+    ("user", "Now deliver your verdict:"),
 ])
 
 moderator_chain = moderator_prompt | llm
