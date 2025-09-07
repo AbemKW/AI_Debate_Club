@@ -218,12 +218,12 @@ for msg in st.session_state.chat_messages:
         )
     elif role == "pro":
         st.markdown(
-            f"<div class='msg pro'><div class='avatar'>🔴</div><div class='bubble'>{content}</div></div>",
+            f"<div class='msg pro'><div class='avatar'>🔵</div><div class='bubble'>{content}</div></div>",
             unsafe_allow_html=True,
         )
     else:  # con
         st.markdown(
-            f"<div class='msg con'><div class='avatar'>🔵</div><div class='bubble'>{content}</div></div>",
+            f"<div class='msg con'><div class='avatar'>🔴</div><div class='bubble'>{content}</div></div>",
             unsafe_allow_html=True,
         )
 st.markdown("</div>", unsafe_allow_html=True)
