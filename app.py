@@ -13,7 +13,7 @@ def run_debate(topic, max_rounds):
         "con_argument": "",
         "current_speaker": "pro",
         "round": 0,
-        "max_rounds": max_rounds + 1
+        "max_rounds": max_rounds
     }
     debate_text = f"🎯 **Debate Topic:** {topic}\n"
     debate_text += f"📊 **Number of Rounds:** {max_rounds}\n"
@@ -34,13 +34,13 @@ def run_debate(topic, max_rounds):
 
             # Check if Pro made a new argument
             if current_pro and current_pro != prev_pro_arg:
-                debate_text += f"🔵 **Pro's Argument (Round {current_round}):**\n{current_pro}\n\n"
+                debate_text += f"🔵 **Pro's Argument (Round {current_round + 1}):**\n{current_pro}\n\n"
                 prev_pro_arg = current_pro
                 yield debate_text
 
             # Check if Con made a new argument  
             if current_con and current_con != prev_con_arg:
-                debate_text += f"🔴 **Con's Argument (Round {current_round}):**\n{current_con}\n\n"
+                debate_text += f"🔴 **Con's Argument (Round {current_round + 1}):**\n{current_con}\n\n"
                 prev_con_arg = current_con
                 yield debate_text
 

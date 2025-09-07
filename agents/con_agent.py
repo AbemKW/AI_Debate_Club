@@ -31,5 +31,6 @@ def con_node(state: DebateState) -> DebateState:
     return {
         "con_argument": result.content,
         "chat_history": [HumanMessage(content=result.content)],
-        "current_speaker": "pro"
+        "current_speaker": "pro",
+        "round": state["round"] + 1
     }
