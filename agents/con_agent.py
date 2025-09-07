@@ -28,7 +28,8 @@ def con_node(state: DebateState) -> DebateState:
         "topic": state["topic"],
         "pro_argument": state.get("pro_argument", "No prior argument."),
         "chat_history": state["chat_history"][-4:],
-        "con_persona": state.get("con_persona", "")
+    "con_persona": state.get("con_persona", "Con"),
+    "pro_persona": state.get("pro_persona", "Pro"),
     })
     print("\nCon's Argument:", result.content)
     return {
