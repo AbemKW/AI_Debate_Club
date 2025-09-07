@@ -29,7 +29,7 @@ def run_debate(topic, max_rounds):
     try:
         for step in graph_app.stream(state, stream_mode="values"):
             # step is a dict with the current state
-            current_round = step.get("round", 1)
+            current_round = step.get("round", 0)
             current_pro = step.get("pro_argument", "")
             current_con = step.get("con_argument", "")
 

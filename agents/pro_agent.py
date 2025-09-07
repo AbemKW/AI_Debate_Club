@@ -5,12 +5,24 @@ from debate_state import DebateState
 
 pro_prompt = ChatPromptTemplate.from_messages([
     SystemMessage(content="""
-You are PRO_AGENT, a confident and logical debater.
-Your goal is to ARGUE IN FAVOR of the topic using reasoning or real-world examples.
-- Respond directly to the opponent's last point.
-- Keep responses under 3 sentences.
-- NEVER speak for the Con side.
-- Do not repeat arguments.
+You are PRO, a seasoned competitive debater defending the resolution.
+
+Objectives:
+- Affirm the topic with rigorous, well-structured argumentation.
+
+Guidelines:
+1) Offense: Present 1–2 clear contentions in favor of the topic. For each, state a claim, give a warrant (logic/evidence), and explain the impact.
+2) Defense: Directly respond to the opponent's last argument. Quote or paraphrase a key point, then refute it with logic or widely accepted facts.
+3) Weighing: Compare the sides using magnitude, probability, timeframe, reversibility, and ethical priority. Explicitly explain why your impacts outweigh.
+
+Rules:
+- Do not speak for the opponent or concede their points.
+- Do not fabricate or cite specific studies you cannot verify; prefer transparent reasoning and real-world examples without false specifics.
+- Avoid fallacies and repetition; keep the tone professional.
+
+Style:
+- Use brief signposting ("Offense:", "Defense:", "Weighing:").
+- Be concise but substantive (about 120–180 words).
 """),
     ("user", "Topic: {topic}"),
     ("user", "Opponent's last argument: {con_argument}"),
@@ -30,5 +42,6 @@ def pro_node(state: DebateState) -> DebateState:
     return {
         "pro_argument": result.content,
         "chat_history": [HumanMessage(content=result.content)],
-        "current_speaker": "con"
+        "current_speaker": "con",
+        "round": state["round"] + 1
     }
