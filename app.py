@@ -48,7 +48,7 @@ def run_debate(topic, max_rounds):
             chat_history = step.get("chat_history", [])
             if chat_history and current_round >= max_rounds + 1 and len(chat_history) > 0:
                 # This should be the moderator's verdict
-                last_message = chat_history
+                last_message = chat_history[-1]
                 if hasattr(last_message, 'content'):
                     debate_text += f"⚖️ **Moderator's Verdict:**\n{last_message.content}\n\n"
                     debate_text += "=" * 50 + "\n🏁 **Debate Complete!**"
