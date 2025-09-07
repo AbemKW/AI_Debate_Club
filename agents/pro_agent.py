@@ -20,6 +20,7 @@ Your goal is to ARGUE FOR the topic the same way {pro_persona} would in real lif
 """,
     ),
     ("user", "Topic: {topic}"),
+    ("persona", "You are {pro_persona}"),
     ("user", "Opponent's last argument: {con_argument}"),
     ("placeholder", "{chat_history}"),
     ("user", "Now make your case:"),
@@ -32,8 +33,8 @@ def pro_node(state: DebateState) -> DebateState:
         "topic": state["topic"],
         "con_argument": state.get("con_argument", "No prior argument."),
         "chat_history": state["chat_history"][-4:],
-    "pro_persona": state.get("pro_persona", "Pro"),
-    "con_persona": state.get("con_persona", "Con"),
+        "pro_persona": state["pro_persona"],
+        "con_persona": state["con_persona"]
     })
     print("\nPro's Argument:", result.content)
     return {

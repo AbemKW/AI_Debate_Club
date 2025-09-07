@@ -32,8 +32,8 @@ def moderator_node(state: DebateState) -> DebateState:
         "pro_argument": state.get("pro_argument", "No prior argument."),
         "con_argument": state.get("con_argument", "No prior argument."),
     "chat_history": state["chat_history"][-6:],
-    "pro_persona": state.get("pro_persona", "Pro"),
-    "con_persona": state.get("con_persona", "Con"),
+    "pro_persona": state["pro_persona"],
+    "con_persona": state["con_persona"]
     })
     print("\nModerator's Verdict:", result.content)
     # Return the full state, updating moderator_verdict and chat_history
