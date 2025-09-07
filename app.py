@@ -13,7 +13,7 @@ def run_debate(topic, max_rounds):
         "con_argument": "",
         "current_speaker": "pro",
         "round": 0,
-        "max_rounds": max_rounds
+        "max_rounds": max_rounds + 1
     }
     debate_text = f"🎯 **Debate Topic:** {topic}\n"
     debate_text += f"📊 **Number of Rounds:** {max_rounds}\n"
