@@ -43,13 +43,13 @@ col_p, col_c = st.columns(2)
 with col_p:
     pro_persona = st.text_input(
         "Pro persona",
-        value="Academic Scholar",
+        value="Donald Trump",
         help="How should the Pro agent behave/talk?",
     )
 with col_c:
     con_persona = st.text_input(
         "Con persona",
-        value="Skeptical Ethicist",
+        value="Dwayne Johnson",
         help="How should the Con agent behave/talk?",
     )
 
@@ -78,7 +78,7 @@ def personas_for_style(style: str) -> tuple[str, str]:
     return ("Academic Scholar", "Skeptical Ethicist")
 
 
-def run_real_debate(topic: str, max_rounds: int, pro_persona: str, con_persona: str, pro_container, con_container) -> bool:
+def run_real_debate(topic: str, max_rounds: int, pro_persona: str, con_persona: str) -> bool:
     """Run the actual LangGraph debate. Returns True if successful, else False.
 
     This mirrors the previous Gradio implementation but renders directly into the
@@ -196,7 +196,7 @@ if start:
     st.session_state.chat_messages = []
     st.session_state.transcript = []
     st.session_state.moderator_verdict = ""
-    success = run_real_debate(topic, max_rounds, pro_persona, con_persona, pro_container, con_container)
+    success = run_real_debate(topic, max_rounds, pro_persona, con_persona)
     if not success:
         # Placeholder fallback: simple alternating messages and a mock verdict
         for i in range(1, int(max_rounds) + 1):
