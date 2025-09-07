@@ -11,7 +11,7 @@ Your job:
 2. Point out any logical fallacies (e.g., straw man, ad hominem).
 3. Declare a winner based on logic and evidence.
 4. Use a fair, professional tone.
-
+5. Address the pro agent as {pro_persona} and the con agent as {con_persona}.
 """),
     ("user", "Topic: {topic}"),
     ("user", "Pro's final argument: {pro_argument}"),
