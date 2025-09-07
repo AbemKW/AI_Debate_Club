@@ -89,6 +89,7 @@ def run_real_debate(topic: str, max_rounds: int, pro_persona: str, con_persona: 
         from graph import graph_app  # type: ignore
     except Exception as e:
         # Dependencies not present or graph not available
+        print("Error importing graph:", e)
         return False
 
     # Ensure non-empty personas with sensible defaults
@@ -167,8 +168,8 @@ st.markdown(
     .msg.con { justify-content: flex-start; }
     .avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; margin: 0 8px; }
     .bubble { max-width: 70%; padding: 10px 14px; border-radius: 16px; line-height: 1.35; font-size: 0.97rem; }
-    .pro .bubble { background: #ffebee; border: 1px solid #ffcdd2; color: #b71c1c; font-weight: 500; }
-    .con .bubble { background: #e3f2fd; border: 1px solid #bbdefb; color: #0d47a1; font-weight: 500; }
+    .pro .bubble { background: #ffebee; border: 1px solid #ffcdd2; color: #b71c1c; font-weight: 600; }
+    .con .bubble { background: #e3f2fd; border: 1px solid #bbdefb; color: #0d47a1; font-weight: 600; }
     .pro .avatar { background: #ffcdd2; color: #b71c1c; }
     .con .avatar { background: #bbdefb; color: #0d47a1; }
       .meta { font-size: 0.75rem; opacity: 0.7; margin: 0 8px; }
