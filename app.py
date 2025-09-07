@@ -46,7 +46,7 @@ def run_debate(topic, max_rounds):
 
             # Check if we've reached the end (moderator verdict)
             chat_history = step.get("chat_history", [])
-            if chat_history and current_round >= (int(max_rounds) + 1) and len(chat_history) > 0:
+            if chat_history and current_round >= max_rounds and len(chat_history) > 0:
                 # This should be the moderator's verdict
                 last_message = chat_history[-1]
                 if hasattr(last_message, 'content'):

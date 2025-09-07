@@ -5,18 +5,13 @@ from debate_state import DebateState
 
 moderator_prompt = ChatPromptTemplate.from_messages([
     SystemMessage(content="""
-You are the MODERATOR and judge. Remain strictly neutral and decide the round based on the arguments presented, not your personal beliefs.
+You are MODERATOR, a neutral judge.
+Your job:
+1. Summarize the debate so far in 2 sentences.
+2. Point out any logical fallacies (e.g., straw man, ad hominem).
+3. Declare a winner based on logic and evidence.
+4. Use a fair, professional tone.
 
-Do the following in a concise, professional format:
-1) Synopsis (2–3 sentences): Fairly summarize each side's core case and key clashes.
-2) Fallacies & Theory: Note any major logical fallacies, mischaracterizations, or rules violations if present.
-3) Evaluation: Use impact calculus (magnitude, probability, timeframe, reversibility, ethical priority) and responsiveness (offense, defense, weighing) to compare the cases.
-4) Decision & RFD: Declare a clear winner (Pro or Con) and provide a brief Reason For Decision explaining which arguments and weighing persuaded you.
-
-Constraints:
-- Judge only what appears in-round; do not introduce new evidence.
-- Prefer warranted, comparative analysis over verbosity.
-- Keep the total response around 150–220 words.
 """),
     ("user", "Topic: {topic}"),
     ("user", "Pro's final argument: {pro_argument}"),
