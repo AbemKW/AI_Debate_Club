@@ -38,6 +38,21 @@ topic = st.text_input(
     help="This is the topic both agents will argue about.",
 )
 
+# Persona inputs for agents
+col_p, col_c = st.columns(2)
+with col_p:
+    pro_persona = st.text_input(
+        "Pro persona",
+        value="Academic Scholar",
+        help="How should the Pro agent behave/talk?",
+    )
+with col_c:
+    con_persona = st.text_input(
+        "Con persona",
+        value="Skeptical Ethicist",
+        help="How should the Con agent behave/talk?",
+    )
+
 start = st.button("Start Debate", type="primary")
 
 
@@ -63,7 +78,7 @@ def personas_for_style(style: str) -> tuple[str, str]:
     return ("Academic Scholar", "Skeptical Ethicist")
 
 
-def run_real_debate(topic: str, max_rounds: int, pro_container, con_container) -> bool:
+def run_real_debate(topic: str, max_rounds: int, pro_persona: str, con_persona: str, pro_container, con_container) -> bool:
     """Run the actual LangGraph debate. Returns True if successful, else False.
 
     This mirrors the previous Gradio implementation but renders directly into the
@@ -76,6 +91,10 @@ def run_real_debate(topic: str, max_rounds: int, pro_container, con_container) -
         # Dependencies not present or graph not available
         return False
 
+    # Ensure non-empty personas with sensible defaults
+    persona_pro = (pro_persona or "").strip() or "Pro"
+    persona_con = (con_persona or "").strip() or "Con"
+
     state = {
         "topic": topic,
         "chat_history": [],
@@ -83,9 +102,9 @@ def run_real_debate(topic: str, max_rounds: int, pro_container, con_container) -
         "con_argument": "",
         "current_speaker": "pro",
         "round": 0,
-        "max_rounds": int(max_rounds)
-        # "pro_persona": pro_persona,
-        # "con_persona": con_persona,
+        "max_rounds": int(max_rounds),
+        "pro_persona": persona_pro,
+        "con_persona": persona_con,
     }
 
     st.session_state.transcript = []
@@ -143,15 +162,18 @@ st.markdown(
     """
     <style>
       .chat-wrapper { max-width: 900px; margin: 0 auto; }
-      .msg { display: flex; margin: 8px 0; }
-      .msg.pro { justify-content: flex-end; }
+    .msg { display: flex; margin: 8px 0; align-items: flex-end; }
+    .msg.pro { justify-content: flex-end; flex-direction: row-reverse; }
       .msg.con { justify-content: flex-start; }
-      .bubble { max-width: 70%; padding: 10px 14px; border-radius: 16px; line-height: 1.35; font-size: 0.97rem; }
-      .pro .bubble { background: #ffebee; border: 1px solid #ffcdd2; color: #b71c1c; }
-      .con .bubble { background: #e3f2fd; border: 1px solid #bbdefb; color: #0d47a1; }
+    .avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; margin: 0 8px; }
+    .bubble { max-width: 70%; padding: 10px 14px; border-radius: 16px; line-height: 1.35; font-size: 0.97rem; }
+    .pro .bubble { background: #ffebee; border: 1px solid #ffcdd2; color: #b71c1c; font-weight: 700; }
+    .con .bubble { background: #e3f2fd; border: 1px solid #bbdefb; color: #0d47a1; font-weight: 700; }
+    .pro .avatar { background: #ffcdd2; color: #b71c1c; }
+    .con .avatar { background: #bbdefb; color: #0d47a1; }
       .meta { font-size: 0.75rem; opacity: 0.7; margin: 0 8px; }
       .moderator { text-align: center; margin: 16px 0; }
-      .moderator .bubble { display: inline-block; background: #f1f8e9; border: 1px solid #dcedc8; color: #2e7d32; }
+    .moderator .bubble { display: inline-block; background: #f1f8e9; border: 1px solid #dcedc8; color: #2e7d32; }
     </style>
     """,
     unsafe_allow_html=True,
@@ -161,7 +183,7 @@ st.markdown(
 st.markdown(
     """
     <div class="chat-wrapper">
-      <div class="meta">Pro messages appear on the right • Con messages on the left</div>
+    <div class="meta">🔴 Pro on the right • 🔵 Con on the left • ⚖️ Moderator centered</div>
     </div>
     """,
     unsafe_allow_html=True,
@@ -174,12 +196,12 @@ if start:
     st.session_state.chat_messages = []
     st.session_state.transcript = []
     st.session_state.moderator_verdict = ""
-    success = run_real_debate(topic, max_rounds, pro_container, con_container)
+    success = run_real_debate(topic, max_rounds, pro_persona, con_persona, pro_container, con_container)
     if not success:
         # Placeholder fallback: simple alternating messages and a mock verdict
         for i in range(1, int(max_rounds) + 1):
-            st.session_state.chat_messages.append({"speaker": "pro", "content": f"[Round {i}] In favor: AI can enhance learning with personalization."})
-            st.session_state.chat_messages.append({"speaker": "con", "content": f"[Round {i}] Against: Over-reliance on AI risks empathy and equity."})
+            st.session_state.chat_messages.append({"speaker": "pro", "content": f"[Round {i}] ({pro_persona or 'Pro'}) In favor: AI can enhance learning with personalization."})
+            st.session_state.chat_messages.append({"speaker": "con", "content": f"[Round {i}] ({con_persona or 'Con'}) Against: Over-reliance on AI risks empathy and equity."})
         st.session_state.moderator_verdict = "After weighing clarity, evidence, and relevance, the Con side narrowly wins due to stronger risk analysis."
         st.session_state.chat_messages.append({"speaker": "moderator", "content": st.session_state.moderator_verdict})
     st.session_state.mode = "Real" if success else "Placeholder"
@@ -190,11 +212,20 @@ for msg in st.session_state.chat_messages:
     role = msg.get("speaker", "")
     content = msg.get("content", "")
     if role == "moderator":
-        st.markdown(f"<div class='moderator'><div class='bubble'><strong>Moderator:</strong> {content}</div></div>", unsafe_allow_html=True)
+        st.markdown(
+            f"<div class='moderator'><div class='bubble'><strong>⚖️ Moderator:</strong> {content}</div></div>",
+            unsafe_allow_html=True,
+        )
     elif role == "pro":
-        st.markdown(f"<div class='msg pro'><div class='bubble'>{content}</div></div>", unsafe_allow_html=True)
+        st.markdown(
+            f"<div class='msg pro'><div class='avatar'>🔴</div><div class='bubble'>{content}</div></div>",
+            unsafe_allow_html=True,
+        )
     else:  # con
-        st.markdown(f"<div class='msg con'><div class='bubble'>{content}</div></div>", unsafe_allow_html=True)
+        st.markdown(
+            f"<div class='msg con'><div class='avatar'>🔵</div><div class='bubble'>{content}</div></div>",
+            unsafe_allow_html=True,
+        )
 st.markdown("</div>", unsafe_allow_html=True)
 
 # If a verdict exists, pin a subtle summary at the bottom
