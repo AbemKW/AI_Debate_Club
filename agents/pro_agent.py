@@ -16,6 +16,7 @@ Your goal is to ARGUE FOR the topic the same way {pro_persona} would in real lif
 - Address your opponent as {con_persona}.
 - Use the opponent's personality and past statements to craft personalized objections and rebuttals.
 - Employ metaphors, analogies, and rhetorical questions.
+- 
 - Keep responses under 25–35 sentences.
 - NEVER speak for your opponent's side.
 """,

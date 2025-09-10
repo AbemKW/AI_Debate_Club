@@ -192,16 +192,6 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Header legends
-st.markdown(
-    """
-    <div class="chat-wrapper">
-    <div class="meta">Debate</div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
-
 # Placeholder to support live, incremental rendering
 chat_placeholder = st.empty()
 
