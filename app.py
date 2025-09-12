@@ -67,17 +67,6 @@ if "moderator_verdict" not in st.session_state:
 if "mode" not in st.session_state:
     st.session_state.mode = "Placeholder"
 
-
-def personas_for_style(style: str) -> tuple[str, str]:
-    """Pick sensible default personas based on the chosen style."""
-    if style == "Aggressive":
-        return ("Hardline Disruptor", "Relentless Critic")
-    if style == "Casual":
-        return ("Pragmatic Tech Enthusiast", "Concerned Parent")
-    # Formal
-    return ("Academic Scholar", "Skeptical Ethicist")
-
-
 def run_real_debate(
     topic: str,
     max_rounds: int,
