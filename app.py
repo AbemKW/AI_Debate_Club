@@ -165,14 +165,14 @@ st.markdown(
     <style>
       .chat-wrapper { max-width: 900px; margin: 0 auto; }
     .msg { display: flex; margin: 8px 0; }
-    .msg.pro { justify-content: flex-end;}
-    .msg.con { justify-content: flex-start; }
+    .msg.pro { justify-content: flex-start;}
+    .msg.con { justify-content: flex-end; }
     .avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; margin: 0 8px; }
     .bubble { max-width: 70%; padding: 10px 14px; border-radius: 16px; line-height: 1.35; font-size: 0.97rem; }
-    .pro .bubble { background: #ffebee; border: 1px solid #ffcdd2; color: #b71c1c; font-weight: 600; }
-    .con .bubble { background: #e3f2fd; border: 1px solid #bbdefb; color: #0d47a1; font-weight: 600; }
-    .pro .avatar { background: #ffcdd2; color: #b71c1c; }
-    .con .avatar { background: #bbdefb; color: #0d47a1; }
+    .pro .bubble { background: #e3f2fd; border: 1px solid #bbdefb; color: #0d47a1; font-weight: 600; }
+    .con .bubble { background: #ffebee; border: 1px solid #ffcdd2; color: #b71c1c; font-weight: 600; }
+    .pro .avatar { background: #bbdefb; color: #0d47a1; }
+    .con .avatar { background: #ffcdd2; color: #b71c1c; }
       .meta { font-size: 0.75rem; opacity: 0.7; margin: 0 8px; }
       .moderator { text-align: center; margin: 16px 0; }
     .moderator .bubble { display: inline-block; background: #f1f8e9; border: 1px solid #dcedc8; color: #2e7d32; }
@@ -208,8 +208,6 @@ def render_chat(placeholder):
                     unsafe_allow_html=True,
                 )
         st.markdown("</div>", unsafe_allow_html=True)
-        if st.session_state.moderator_verdict:
-            st.success("Moderator's decision: " + st.session_state.moderator_verdict)
 
 
 # If user clicks the button, try real debate then fall back
