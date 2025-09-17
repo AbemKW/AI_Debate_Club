@@ -56,11 +56,9 @@ with col_c:
 start = st.button("Start Debate", type="primary")
 
 
-# Keep a transcript in the session so new runs append properly
 if "transcript" not in st.session_state:
-    st.session_state.transcript = []  # legacy structure: [{round, pro, con}]
+    st.session_state.transcript = []
 if "chat_messages" not in st.session_state:
-    # flat chat log for UI: [{speaker: 'pro'|'con'|'moderator', content: str}]
     st.session_state.chat_messages = []
 if "moderator_verdict" not in st.session_state:
     st.session_state.moderator_verdict = ""

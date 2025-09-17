@@ -6,12 +6,12 @@ Falls back to (None, None) if langmem or LangGraph store isn't available.
 from typing import Tuple, Optional
 
 try:
-    from langmem import create_manage_memory_tool, create_search_memory_tool  # type: ignore
-    from langgraph.store.memory import InMemoryStore  # type: ignore
+    from langmem import create_manage_memory_tool, create_search_memory_tool
+    from langgraph.store.memory import InMemoryStore
 except Exception:
-    create_manage_memory_tool = None  # type: ignore
-    create_search_memory_tool = None  # type: ignore
-    InMemoryStore = None  # type: ignore
+    create_manage_memory_tool = None
+    create_search_memory_tool = None
+    InMemoryStore = None
 
 
 def get_memory_tools(namespace: str) -> Tuple[Optional[object], Optional[object]]:

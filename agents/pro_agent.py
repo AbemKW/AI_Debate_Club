@@ -3,9 +3,9 @@ from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage
 from llm import llm
 from debate_state import DebateState
 from tools.web_research import gather_evidence, fact_check_claim
-from tools.memory import get_memory_tools  # NEW
+from tools.memory import get_memory_tools
 
-# Initialize memory tools for Pro agent (may be (None, None) if langmem isn't installed)
+
 _pro_manage, _pro_search = get_memory_tools("pro_agent")
 
 pro_prompt = ChatPromptTemplate.from_messages([
