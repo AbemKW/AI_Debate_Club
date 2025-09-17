@@ -3,6 +3,10 @@ from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage
 from llm import llm
 from debate_state import DebateState
 from tools.web_research import gather_evidence, fact_check_claim
+from tools.memory import get_memory_tools  # NEW
+
+# Initialize memory tools for Con agent
+_con_manage, _con_search = get_memory_tools("con_agent")
 
 con_prompt = ChatPromptTemplate.from_messages([
     (
@@ -33,6 +37,17 @@ con_chain = con_prompt | llm
 
 
 def con_node(state: DebateState) -> DebateState:
+    # Retrieve recent memories (best-effort)
+    mem_msg = None
+    if _con_search is not None:
+        try:
+            resp = _con_search.invoke({"query": f"recent memories about topic: {state['topic']}"})
+            mem_text = getattr(resp, "content", "") or str(resp)
+            if mem_text:
+                mem_msg = HumanMessage(content=f"[MEMORY]\n{mem_text}")
+        except Exception:
+            mem_msg = None
+
     # Gather web evidence and quick fact-checks before composing
     opponent_claim = state.get("pro_argument", "") or ""
     con_evidence = gather_evidence(
@@ -45,16 +60,31 @@ def con_node(state: DebateState) -> DebateState:
     )
     con_factcheck = fact_check_claim(opponent_claim, topic=state["topic"]) if opponent_claim else ""
 
+    recent = state["chat_history"][-4:] if state.get("chat_history") else []
+    if mem_msg:
+        prompt_chat_history = [mem_msg] + recent
+    else:
+        prompt_chat_history = recent
+
     result = con_chain.invoke({
         "topic": state["topic"],
         "pro_argument": opponent_claim or "No prior argument.",
-        "chat_history": state["chat_history"][-4:],
+        "chat_history": prompt_chat_history,
         "con_persona": state["con_persona"],
         "pro_persona": state["pro_persona"],
         "con_evidence": con_evidence,
         "con_factcheck": con_factcheck,
     })
     print("\nCon's Argument:", result.content)
+
+    # Store a short memory about this turn (best-effort)
+    if _con_manage is not None:
+        try:
+            short_mem = f"Con ({state.get('con_persona')}) argued: {result.content[:500]}"
+            _con_manage.invoke({"messages": [{"role": "user", "content": f"Remember: {short_mem}"}]})
+        except Exception:
+            pass
+
     return {
         "con_argument": result.content,
         "chat_history": [HumanMessage(content=result.content)],

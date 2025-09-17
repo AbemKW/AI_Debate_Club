@@ -3,6 +3,10 @@ from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage
 from llm import llm
 from debate_state import DebateState
 from tools.web_research import gather_evidence, fact_check_claim
+from tools.memory import get_memory_tools  # NEW
+
+# Initialize memory tools for Pro agent (may be (None, None) if langmem isn't installed)
+_pro_manage, _pro_search = get_memory_tools("pro_agent")
 
 pro_prompt = ChatPromptTemplate.from_messages([
     (
@@ -33,6 +37,18 @@ Your goal is to ARGUE FOR the topic the same way {pro_persona} would in real lif
 pro_chain = pro_prompt | llm
 
 def pro_node(state: DebateState) -> DebateState:
+    # Retrieve recent memories (best-effort)
+    mem_msg = None
+    if _pro_search is not None:
+        try:
+            # query signature depends on LangMem tool; assume a simple 'query' payload
+            resp = _pro_search.invoke({"query": f"recent memories about topic: {state['topic']}"})
+            mem_text = getattr(resp, "content", "") or str(resp)
+            if mem_text:
+                mem_msg = HumanMessage(content=f"[MEMORY]\n{mem_text}")
+        except Exception:
+            mem_msg = None
+
     # Gather web evidence and quick fact-checks before composing
     opponent_claim = state.get("con_argument", "") or ""
     pro_evidence = gather_evidence(
@@ -45,16 +61,32 @@ def pro_node(state: DebateState) -> DebateState:
     )
     pro_factcheck = fact_check_claim(opponent_claim, topic=state["topic"]) if opponent_claim else ""
 
+    # Build chat_history with memory (if present) + recent messages
+    recent = state["chat_history"][-4:] if state.get("chat_history") else []
+    if mem_msg:
+        prompt_chat_history = [mem_msg] + recent
+    else:
+        prompt_chat_history = recent
+
     result = pro_chain.invoke({
         "topic": state["topic"],
         "con_argument": opponent_claim or "No prior argument.",
-        "chat_history": state["chat_history"][-4:],
+        "chat_history": prompt_chat_history,
         "pro_persona": state["pro_persona"],
         "con_persona": state["con_persona"],
         "pro_evidence": pro_evidence,
         "pro_factcheck": pro_factcheck,
     })
     print("\nPro's Argument:", result.content)
+
+    # Store a short memory about this turn (best-effort)
+    if _pro_manage is not None:
+        try:
+            short_mem = f"Pro ({state.get('pro_persona')}) argued: {result.content[:500]}"
+            _pro_manage.invoke({"messages": [{"role": "user", "content": f"Remember: {short_mem}"}]})
+        except Exception:
+            pass
+
     return {
         "pro_argument": result.content,
         "chat_history": [HumanMessage(content=result.content)],
