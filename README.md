@@ -6,6 +6,8 @@ colorFrom: red
 colorTo: yellow
 ---
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/rlxmLQTNWlU?si=CIVTk3FYPJbO76wb" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 # AI Debate Club: Multi-Agent AI Debate Platform
 
 An interactive Streamlit application that simulates intelligent debates between AI agents using advanced language models and orchestration frameworks. Experience the future of AI discourse where autonomous agents engage in structured, turn-based debates on complex topics.
