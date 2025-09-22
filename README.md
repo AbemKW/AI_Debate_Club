@@ -6,7 +6,7 @@ colorFrom: red
 colorTo: yellow
 ---
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/rlxmLQTNWlU?si=CIVTk3FYPJbO76wb" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+[YouTube Demo](https://www.youtube.com/watch?v=rlxmLQTNWlU&list=PLiuwYwnHlubxCD4fE5I-VUtkTbc9CRL7Y)
 
 # AI Debate Club: Multi-Agent AI Debate Platform
 
