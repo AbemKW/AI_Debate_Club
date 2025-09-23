@@ -6,48 +6,58 @@ colorFrom: red
 colorTo: yellow
 ---
 
-[YouTube Demo](https://www.youtube.com/watch?v=rlxmLQTNWlU&list=PLiuwYwnHlubxCD4fE5I-VUtkTbc9CRL7Y)
+[YouTube Demo]()
+# AI Debate Club
 
-# AI Debate Club: Multi-Agent AI Debate Platform
+> **Two AI agents. One topic. A full debate — with research, memory, and personality.**
 
-An interactive Streamlit application that simulates intelligent debates between AI agents using advanced language models and orchestration frameworks. Experience the future of AI discourse where autonomous agents engage in structured, turn-based debates on complex topics.
+A multi-agent AI system where two roleplaying agents argue user-defined topics, supported by web research, persistent memory, and expressive persona-driven reasoning — all orchestrated via LangGraph and powered by Groq.
 
-## Features
+[Watch the 3-part YouTube series]([https://youtube.com/playlist?list=...](https://www.youtube.com/watch?v=rlxmLQTNWlU&list=PLiuwYwnHlubxCD4fE5I-VUtkTbc9CRL7Y))  
+[Try the live demo on Hugging Face](https://huggingface.co/spaces/yourname/ai-debate-club)
 
-- **Multi-Agent Architecture**: Pro and Con agents debate autonomously with a neutral Moderator overseeing the discussion
-- **LangGraph Integration**: Built on LangGraph for robust agent orchestration and state management
-- **Real-time Streaming**: Watch debates unfold in real-time with smooth text streaming
-- **Context-Aware Responses**: Agents maintain conversation history and build upon previous arguments
-- **Customizable Topics**: Input any debate topic and watch the AI agents formulate compelling arguments
-- **Turn-Based Moderation**: Ensures fair, structured debate with proper turn-taking and summary generation
+##  Features
 
-## How It Works
+**Multi-Agent Orchestration**  
+- Pro, Con, and Moderator agents take turns using **LangGraph** state machines and conditional routing.
 
-1. **Input Debate Topic**: Enter any controversial or thought-provoking topic
-2. **Agent Initialization**: Pro and Con agents are instantiated with opposing viewpoints
-3. **Structured Debate**: Moderator ensures alternating turns and maintains debate coherence
-4. **Intelligent Responses**: Each agent generates contextually relevant arguments using advanced language models
-5. **Debate Summary**: Moderator provides final analysis and key takeaways
+**Persona-Driven Debates**  
+- Assign any personas (e.g., "Socrates vs Elon Musk", "Trump vs The Rock") — agents adapt tone, style, and rhetoric dynamically.
 
-## Technical Stack
+**Web Research with Bias Simulation**  
+- Each agent runs **biased web searches** to find supporting evidence and fact-check opponents using DuckDuckGo.
+- Search queries are LLM-generated for maximum relevance.
 
-- **Frontend**: Streamlit for interactive web interface
-- **Backend**: Python with LangGraph for agent orchestration
-- **AI Models**: Integration-ready for Hugging Face models and OpenAI GPT series
-- **State Management**: Robust conversation memory and context tracking
+**Persistent Memory**  
+- Agents remember past arguments using **LangMem**.
+- Avoid repetition, build on previous points, and call out contradictions.
 
-## Getting Started
+**Rhetorical Diversity Engine**  
+- Forces rotation of rhetorical styles (analogy, data, anecdote, emotion) to prevent monotony.
+- Ensures unique voice across rounds.
 
-This Space runs a Streamlit app from `app.py`. The current implementation includes:
+**Streamlit UI**  
+- Interactive interface showing real-time debate flow, citations, and agent roles.
+- Easy for non-technical users to engage.
 
-- Complete UI framework with debate visualization
-- Agent architecture with placeholder responses
-- Moderation logic for turn management
+---
 
-## Notes
+## Tech Stack
 
-- Currently uses placeholder text for PRO/CON outputs to demonstrate the interface
-- Supports Hugging Face Inference API or direct LangGraph pipeline connections
-- Easily extensible for additional debate formats (panels, cross-examinations, etc.)
+| Layer | Technology |
+|------|------------|
+| **Orchestration** | LangGraph, LangChain |
+| **LLM Backend** | Groq (Llama-3), or local Qwen3-4B via LM Studio |
+| **UI** | Streamlit |
+| **Research** | DuckDuckGo Search, `langchain-huggingface` |
+| **Memory** | LangMem (InMemoryStore) |
+| **Deployment** | Hugging Face Spaces |
 
-Explore the power of multi-agent AI systems in structured debate scenarios! 🧠⚖️🤖
+---
+
+## 🚀 Quick Start
+
+### 1. Clone the repo
+```bash
+git clone https://github.com/yourname/ai-debate-club.git
+cd ai-debate-club
