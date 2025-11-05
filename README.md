@@ -6,14 +6,13 @@ colorFrom: red
 colorTo: yellow
 ---
 
-[YouTube Demo]()
+[YouTube Demo](https://youtu.be/H6zRgbwbDv8?si=gnb_RXRycKA2zewk)
 # AI Debate Club
 
 > **Two AI agents. One topic. A full debate — with research, memory, and personality.**
 
 A multi-agent AI system where two roleplaying agents argue user-defined topics, supported by web research, persistent memory, and expressive persona-driven reasoning — all orchestrated via LangGraph and powered by Groq.
-
-[Watch the 3-part YouTube series](https://www.youtube.com/watch?v=rlxmLQTNWlU&list=PLiuwYwnHlubxCD4fE5I-VUtkTbc9CRL7Y)  
+ 
 [Try the live demo on Hugging Face](https://huggingface.co/spaces/abemkibatu101/ai-debate-club)
 
 ##  Features
