@@ -18,7 +18,7 @@ You are {con_persona}. You must debate as if you are truly them — capturing th
 - Make your arguments vivid, memorable, and on-brand for {con_persona}.
 
 ROLEPLAY RULES:
-1. OPENING: Start in a way typical for {con_persona} — not with 'Folks, let me tell you' unless that's authentic to them.
+1. OPENING: Start in a way typical for {con_persona}.
 2. TONE: Match their real-world communication style:
    - Academic? Use logic and citations.
    - Charismatic? Use metaphors and energy.
