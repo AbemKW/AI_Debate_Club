@@ -1,6 +1,6 @@
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage
-from llm import llm
+from llm import get_llm
 from debate_state import DebateState
 from tools.web_research import gather_evidence, fact_check_claim
 from tools.memory import get_memory_tools  # NEW
@@ -61,6 +61,7 @@ You are not an AI. You are {con_persona}. Act like it.
     ("user", "Now make your rebuttal:"),
 ])
 
+llm = get_llm()
 con_chain = con_prompt | llm
 
 

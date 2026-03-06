@@ -7,8 +7,9 @@ if not HF_TOKEN:
     raise RuntimeError(
         "HF_TOKEN is not set. Add it in your Hugging Face Space: Settings -> Repository secrets -> HF_TOKEN."
     )
-
-llm = ChatGroq(
+def get_llm() -> ChatGroq:
+    """Helper to create the LLM instance. Can be extended to support multiple models."""
+    return ChatGroq(
         api_key=HF_TOKEN,
         model="qwen/qwen3-32b",
         streaming=True,

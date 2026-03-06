@@ -1,6 +1,6 @@
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage
-from llm import llm
+from llm import get_llm
 from debate_state import DebateState
 
 moderator_prompt = ChatPromptTemplate.from_messages([
@@ -23,6 +23,7 @@ Your job:
     ("user", "Now deliver your verdict:"),
 ])
 
+llm = get_llm()
 moderator_chain = moderator_prompt | llm
 
 
