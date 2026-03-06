@@ -73,9 +73,13 @@ def build_citations(results: List[Dict[str, Any]]) -> str:
 
 def _json_list_guard(txt: str, fallback: List[str]) -> List[str]:
     import json
+    import re
     try:
+        match = re.search(r'\[.*\]', txt, re.DOTALL)
+        if match:
+            txt = match.group(0)
         data = json.loads(txt)
-        if isinstance(data, list) and all(isinstance(x, str) for x in data):
+        if isinstance(data, list) and all(isinstance(x, (str, int, float)) for x in data):
             return data[:6]
     except Exception:
         pass

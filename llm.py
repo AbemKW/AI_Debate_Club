@@ -1,38 +1,45 @@
 import os
-from langchain_groq import ChatGroq
 
-# Prefer the explicit HF_TOKEN env var, fall back to older "groq_key" name
-HF_TOKEN = os.environ.get("HF_TOKEN") or os.environ.get("groq_key")
-if not HF_TOKEN:
-    # Make missing token obvious at startup in Space logs
+def get_llm():
+    """Helper to create the LLM instance. Defaults to OpenAI, falls back to Groq."""
+    
+    # Try OpenAI first
+    openai_key = os.environ.get("OPENAI_API_KEY")
+    if openai_key:
+        from langchain_openai import ChatOpenAI
+        return ChatOpenAI(
+            model="gpt-4o-mini",
+            temperature=0.7,
+            streaming=True
+        )
+
+    # Try Groq as fallback
+    groq_key = os.environ.get("GROQ_API_KEY") or os.environ.get("HF_TOKEN") or os.environ.get("groq_key")
+    if groq_key:
+        from langchain_groq import ChatGroq
+        return ChatGroq(
+            api_key=groq_key,
+            model="llama-3.3-70b-versatile",
+            temperature=0.7,
+            streaming=True
+        )
+        
     raise RuntimeError(
-        "HF_TOKEN (or groq_key) is not set. Add it in your Hugging Face Space: Settings -> Repository secrets -> HF_TOKEN."
-    )
-
-def get_llm() -> ChatGroq:
-    """Helper to create the LLM instance. Can be extended to support multiple models."""
-    return ChatGroq(
-        api_key=HF_TOKEN,
-        model="qwen/qwen3-32b",
-        streaming=True,
-        temperature=0.7,
+        "No API key found. Please set OPENAI_API_KEY or GROQ_API_KEY."
     )
 
 def health_check() -> bool:
-    """Run a tiny test call to verify router + token + model work.
-
-    Returns (ok, message).
-    """
+    """Run a tiny test call to verify router + token + model work."""
     try:
-        # Use the minimal LC chat interface via a fresh client to avoid
-        # relying on any external module-level state.
         client = get_llm()
         resp = client.invoke("ping")
-        txt = getattr(resp, "content", None) or str(resp)
         return True
-    except Exception:
+    except Exception as e:
+        print(f"Health check failed: {e}")
         return False
 
-
-# Export a module-level `llm` for callers that expect it (legacy compatibility)
-llm = get_llm()
+# Export a module-level `llm` for callers that expect it
+try:
+    llm = get_llm()
+except Exception:
+    llm = None

@@ -116,6 +116,7 @@ def con_node(state: DebateState) -> DebateState:
 
     return {
         "con_argument": result.content,
+        "con_citations": f"**Evidence Gathered:**\n{con_evidence}\n\n**Fact Check:**\n{con_factcheck}" if con_evidence or con_factcheck else "",
         "chat_history": [HumanMessage(content=result.content)],
         "current_speaker": "pro",
         "round": state["round"] + 1

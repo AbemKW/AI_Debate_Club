@@ -21,8 +21,9 @@ def get_memory_tools(namespace: str) -> Tuple[Optional[object], Optional[object]
     """
     if create_manage_memory_tool is None or create_search_memory_tool is None or InMemoryStore is None:
         return None, None
-    # Simple in-memory store; in production you may want a persistent store
-    store = InMemoryStore(index={"dims": 1536, "embed": "openai:text-embedding-3-small"})
-    manage = create_manage_memory_tool(namespace=(f"mem-{namespace}",))
-    search = create_search_memory_tool(namespace=(f"mem-{namespace}",))
-    return manage, search
+    try:
+        manage = create_manage_memory_tool(namespace=(f"mem-{namespace}",))
+        search = create_search_memory_tool(namespace=(f"mem-{namespace}",))
+        return manage, search
+    except Exception:
+        return None, None
