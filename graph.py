@@ -4,14 +4,6 @@ from agents.con_agent import con_node
 from agents.moderator_agent import moderator_node
 from debate_state import DebateState
 
-try:
-    from langgraph.store.memory import InMemoryStore
-    # We create a simple store without forcing specific embeddings so it doesn't crash 
-    # if OpenAI is missing but Groq is used.
-    store = InMemoryStore()
-except Exception:
-    store = None
-
 graph = StateGraph(DebateState)
 graph.add_node("pro", pro_node)
 graph.add_node("con", con_node)
@@ -33,4 +25,4 @@ graph.add_conditional_edges("pro", route_speaker)
 graph.add_conditional_edges("con", route_speaker)
 graph.add_conditional_edges("moderator", lambda x: END)
 
-graph_app = graph.compile(store=store) if store else graph.compile()
+graph_app = graph.compile()

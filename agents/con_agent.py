@@ -1,12 +1,7 @@
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage
+from langchain_core.messages import HumanMessage
 from llm import get_llm
 from debate_state import DebateState
-from tools.web_research import gather_evidence, fact_check_claim
-from tools.memory import get_memory_tools  # NEW
-
-# Initialize memory tools for Con agent
-_con_manage, _con_search = get_memory_tools("con_agent")
 
 con_prompt = ChatPromptTemplate.from_messages([
     (
@@ -33,12 +28,10 @@ ROLEPLAY RULES:
    - Emotional appeal
    → Rotate styles. Never use the same two turns in a row.
 4. ADDRESS OPPONENT: Call them by name: "{pro_persona}"
-5. REFERENCE PAST: Use memory to say things like:
+5. REFERENCE PAST: Use chat history to say things like:
    - "{pro_persona}, you said X earlier — but that contradicts Y."
    - "Last round, you avoided answering Z."
-6. EVIDENCE USE: Don't just cite — interpret:
-   - "This study proves what I've been saying all along..."
-7. LENGTH: Keep under 8–10 sentences. Be impactful.
+6. LENGTH: Keep under 8–10 sentences. Be impactful.
 
 ANTI-BIAS RULES:
 - NEVER repeat a point already made (by you or opponent).
@@ -55,8 +48,6 @@ You are not an AI. You are {con_persona}. Act like it.
     ("user", "Topic: {topic}"),
     ("user", "You are {con_persona}"),
     ("user", "Opponent's last argument: {pro_argument}"),
-    ("user", "Helpful citations supporting your side:\n{con_evidence}"),
-    ("user", "Quick fact-check on opponent's claim(s):\n{con_factcheck}"),
     ("placeholder", "{chat_history}"),
     ("user", "Now make your rebuttal:"),
 ])
@@ -66,58 +57,18 @@ con_chain = con_prompt | llm
 
 
 def con_node(state: DebateState) -> DebateState:
-    # Retrieve recent memories (best-effort)
-    mem_msg = None
-    if _con_search is not None:
-        try:
-            resp = _con_search.invoke({"query": f"recent memories about topic: {state['topic']}"})
-            mem_text = getattr(resp, "content", "") or str(resp)
-            if mem_text:
-                mem_msg = HumanMessage(content=f"[MEMORY]\n{mem_text}")
-        except Exception:
-            mem_msg = None
-
-    # Gather web evidence and quick fact-checks before composing
-    opponent_claim = state.get("pro_argument", "") or ""
-    con_evidence = gather_evidence(
-        topic=state["topic"],
-        stance="con",
-        persona=state["con_persona"],
-        opponent_claim=opponent_claim,
-        mode="support",
-        bias_strength=0.85,
-    )
-    con_factcheck = fact_check_claim(opponent_claim, topic=state["topic"]) if opponent_claim else ""
-
-    recent = state["chat_history"][-4:] if state.get("chat_history") else []
-    if mem_msg:
-        prompt_chat_history = [mem_msg] + recent
-    else:
-        prompt_chat_history = recent
-
     result = con_chain.invoke({
         "topic": state["topic"],
-        "pro_argument": opponent_claim or "No prior argument.",
-        "chat_history": prompt_chat_history,
+        "pro_argument": state.get("pro_argument") or "No prior argument.",
+        "chat_history": state["chat_history"][-4:] if state.get("chat_history") else [],
         "con_persona": state["con_persona"],
         "pro_persona": state["pro_persona"],
-        "con_evidence": con_evidence,
-        "con_factcheck": con_factcheck,
     })
     print("\nCon's Argument:", result.content)
 
-    # Store a short memory about this turn (best-effort)
-    if _con_manage is not None:
-        try:
-            short_mem = f"Con ({state.get('con_persona')}) argued: {result.content[:500]}"
-            _con_manage.invoke({"messages": [{"role": "user", "content": f"Remember: {short_mem}"}]})
-        except Exception:
-            pass
-
     return {
         "con_argument": result.content,
-        "con_citations": f"**Evidence Gathered:**\n{con_evidence}\n\n**Fact Check:**\n{con_factcheck}" if con_evidence or con_factcheck else "",
         "chat_history": [HumanMessage(content=result.content)],
         "current_speaker": "pro",
-        "round": state["round"] + 1
+        "round": state["round"] + 1,
     }

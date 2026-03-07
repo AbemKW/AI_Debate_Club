@@ -13,5 +13,3 @@ class DebateState(TypedDict):
     moderator_verdict: str
     pro_persona: str
     con_persona: str
-    pro_citations: str
-    con_citations: str
