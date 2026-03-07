@@ -5,6 +5,7 @@ Streamlit front-end for AI Debate Club.
 from __future__ import annotations
 
 import html as html_lib
+from langchain_core.messages import AIMessageChunk
 
 import streamlit as st
 
@@ -14,210 +15,186 @@ import streamlit as st
 st.set_page_config(page_title="AI Debate Club", layout="wide", page_icon="⚖️")
 
 # ----------------------------
-# Global CSS — dark, minimal, no gradients
+# Global CSS
 # ----------------------------
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --bg:       #0a0a0a;
-  --surface:  #141414;
-  --border:   #222222;
-  --border2:  #2c2c2c;
-  --text:     #e0e0e0;
-  --muted:    #5a5a5a;
-  --pro:      #4f8ef7;
-  --con:      #e05555;
-  --mod:      #c9932a;
+  --bg:      #0a0a0a;
+  --surface: #141414;
+  --border:  #222222;
+  --border2: #2c2c2c;
+  --text:    #e0e0e0;
+  --muted:   #5a5a5a;
+  --pro:     #4f8ef7;
+  --con:     #e05555;
+  --mod:     #c9932a;
 }
 
-html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
+html, body, .stApp,
+[data-testid="stAppViewContainer"],
+[data-testid="stMain"] {
   background-color: var(--bg) !important;
   font-family: 'Inter', 'Segoe UI', sans-serif !important;
   color: var(--text) !important;
 }
 
-[data-testid="stHeader"]         { background: transparent !important; display: none; }
+[data-testid="stHeader"]         { display: none !important; }
 [data-testid="stSidebar"]        { background-color: var(--surface) !important;
                                    border-right: 1px solid var(--border) !important; }
 [data-testid="stSidebarContent"] { background: transparent !important; }
 
-/* Remove Streamlit's default padding on main block */
-.block-container { padding-top: 2rem !important; max-width: 1200px !important; }
+.block-container { padding-top: 2rem !important; max-width: 860px !important; }
 
-/* ---- App header ---- */
+/* ── App header ── */
 .app-header {
   display: flex;
   align-items: baseline;
-  gap: 0.75rem;
+  gap: 0.6rem;
   border-bottom: 1px solid var(--border);
-  padding-bottom: 1rem;
+  padding-bottom: 0.9rem;
   margin-bottom: 1.5rem;
 }
-.app-header .app-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: -0.01em;
-}
-.app-header .app-subtitle {
-  font-size: 0.82rem;
-  color: var(--muted);
-}
+.app-header .app-title    { font-size: 1rem; font-weight: 700; color: var(--text); }
+.app-header .app-subtitle { font-size: 0.8rem; color: var(--muted); }
 
-/* ---- Topic display ---- */
+/* ── Topic ── */
 .topic-line {
-  font-size: 1.35rem;
+  font-size: 1.3rem;
   font-weight: 600;
   color: var(--text);
   letter-spacing: -0.02em;
   margin-bottom: 1.5rem;
   line-height: 1.3;
 }
-.topic-line .topic-label {
-  font-size: 0.7rem;
+.topic-label {
+  font-size: 0.65rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--muted);
   display: block;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.2rem;
 }
 
-/* ---- Debate column headers ---- */
-.col-header {
+/* ── Round divider ── */
+.round-divider {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 0;
-  border-bottom: 2px solid var(--border);
-  margin-bottom: 1rem;
-}
-.col-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.col-role {
-  font-size: 0.65rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-}
-.col-name {
-  font-size: 0.88rem;
-  font-weight: 500;
-  color: var(--text);
-}
-.col-header-pro .col-dot  { background: var(--pro); }
-.col-header-pro .col-role { color: var(--pro); }
-.col-header-pro            { border-bottom-color: var(--pro); }
-.col-header-con .col-dot  { background: var(--con); }
-.col-header-con .col-role { color: var(--con); }
-.col-header-con            { border-bottom-color: var(--con); }
-
-/* ---- Argument cards ---- */
-.arg-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 1rem 1.1rem;
-  margin-bottom: 0.75rem;
-}
-.arg-card .round-label {
+  gap: 0.75rem;
+  margin: 1.25rem 0 0.75rem;
+  color: var(--muted);
   font-size: 0.65rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--muted);
-  margin-bottom: 0.5rem;
+  letter-spacing: 0.12em;
 }
-.arg-card .arg-text {
-  font-size: 0.93rem;
+.round-divider::before, .round-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── Chat bubbles ── */
+.chat-row {
+  display: flex;
+  margin-bottom: 0.75rem;
+}
+.chat-row-pro { justify-content: flex-start; }
+.chat-row-con { justify-content: flex-end; }
+
+.bubble {
+  max-width: 72%;
+  padding: 0.85rem 1.1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.bubble-pro {
+  border-left: 2px solid var(--pro);
+  border-radius: 3px 10px 10px 10px;
+}
+.bubble-con {
+  border-right: 2px solid var(--con);
+  border-radius: 10px 3px 10px 10px;
+}
+
+.bubble-name {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  margin-bottom: 0.45rem;
+}
+.bubble-name-pro { color: var(--pro); }
+.bubble-name-con { color: var(--con); }
+
+.bubble-text {
+  font-size: 0.92rem;
   line-height: 1.72;
   color: var(--text);
 }
-.arg-card-pro { border-left: 3px solid var(--pro); }
-.arg-card-con { border-right: 3px solid var(--con); }
 
-/* ---- Divider between rounds ---- */
-.round-divider {
-  text-align: center;
-  margin: 0.5rem 0;
-  color: var(--border2);
-  font-size: 0.75rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
+.cursor { opacity: 0.6; }
 
-/* ---- Moderator verdict ---- */
-.verdict-block {
-  border-top: 1px solid var(--border);
-  margin-top: 1.5rem;
-  padding-top: 1.25rem;
+/* ── Verdict ── */
+.verdict-wrap {
+  margin-top: 1.75rem;
+  padding: 1.1rem 1.2rem;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-top: 2px solid var(--mod);
+  border-radius: 4px;
 }
-.verdict-block .verdict-label {
+.verdict-label {
   font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--mod);
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.55rem;
 }
-.verdict-block .verdict-text {
-  font-size: 0.93rem;
+.verdict-text {
+  font-size: 0.92rem;
   line-height: 1.72;
   color: #d4a72c;
 }
 
-/* ---- Status bar ---- */
-.status-bar {
-  font-size: 0.8rem;
+/* ── Status line ── */
+.status-line {
+  font-size: 0.78rem;
   color: var(--muted);
-  padding: 0.45rem 0;
-  border-top: 1px solid var(--border);
-  margin-top: 0.5rem;
+  margin: 0.4rem 0;
+  padding-left: 2px;
 }
 
-/* ---- Sidebar ---- */
-.sidebar-section-label {
-  font-size: 0.65rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--muted);
-  margin-bottom: 0.5rem;
-  margin-top: 1.25rem;
-}
-.side-card {
-  border-radius: 4px;
-  border: 1px solid var(--border);
-  padding: 0.55rem 0.8rem;
-  margin-bottom: 0.4rem;
-  background: var(--bg);
-}
-.side-card .side-role {
+/* ── Sidebar ── */
+.sb-label {
   font-size: 0.62rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-top: 1.2rem;
+  margin-bottom: 0.4rem;
 }
-.side-card .side-name {
-  font-size: 0.88rem;
-  color: var(--text);
-  margin-top: 0.15rem;
+.sb-card {
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.35rem;
+  background: var(--bg);
 }
-.side-card-pro { border-left: 3px solid var(--pro); }
-.side-card-pro .side-role { color: var(--pro); }
-.side-card-con { border-left: 3px solid var(--con); }
-.side-card-con .side-role { color: var(--con); }
+.sb-card .sb-role { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+.sb-card .sb-name { font-size: 0.85rem; color: var(--text); margin-top: 0.1rem; }
+.sb-card-pro { border-left: 3px solid var(--pro); }
+.sb-card-pro .sb-role { color: var(--pro); }
+.sb-card-con { border-left: 3px solid var(--con); }
+.sb-card-con .sb-role { color: var(--con); }
 
-/* Progress override */
-.stProgress > div > div > div > div { background: var(--pro) !important; }
-
-/* Input / widget overrides */
+/* ── Widget overrides ── */
 [data-testid="stTextInput"] input {
   background: var(--surface) !important;
   border: 1px solid var(--border2) !important;
@@ -228,20 +205,15 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
   border-color: var(--pro) !important;
   box-shadow: 0 0 0 2px rgba(79,142,247,0.15) !important;
 }
-div[data-baseweb="slider"] { accent-color: var(--pro); }
-
-/* Button */
 .stButton > button[kind="primary"] {
   background: var(--pro) !important;
   border: none !important;
   color: #fff !important;
   font-weight: 600 !important;
   border-radius: 4px !important;
-  letter-spacing: 0.01em !important;
 }
-.stButton > button[kind="primary"]:hover {
-  background: #3a78e0 !important;
-}
+.stButton > button[kind="primary"]:hover { background: #3a78e0 !important; }
+.stProgress > div > div > div > div { background: var(--pro) !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -250,74 +222,62 @@ div[data-baseweb="slider"] { accent-color: var(--pro); }
 # Helpers
 # ----------------------------
 def _e(s: str) -> str:
-    """HTML-escape a string."""
     return html_lib.escape(s or "")
 
 
-def render_arg_card(content: str, role: str, round_num: int) -> None:
-    css_class = "arg-card-pro" if role == "pro" else "arg-card-con"
+def bubble_html(content: str, role: str, persona: str, streaming: bool = False) -> str:
     safe = _e(content).replace("\n", "<br>")
-    st.markdown(f"""
-    <div class="arg-card {css_class}">
-      <div class="round-label">Round {round_num}</div>
-      <div class="arg-text">{safe}</div>
-    </div>
-    """, unsafe_allow_html=True)
+    cursor = '<span class="cursor">▌</span>' if streaming else ""
+    if role == "pro":
+        return (
+            f'<div class="chat-row chat-row-pro">'
+            f'<div class="bubble bubble-pro">'
+            f'<div class="bubble-name bubble-name-pro">{_e(persona)}</div>'
+            f'<div class="bubble-text">{safe}{cursor}</div>'
+            f'</div></div>'
+        )
+    elif role == "con":
+        return (
+            f'<div class="chat-row chat-row-con">'
+            f'<div class="bubble bubble-con">'
+            f'<div class="bubble-name bubble-name-con">{_e(persona)}</div>'
+            f'<div class="bubble-text">{safe}{cursor}</div>'
+            f'</div></div>'
+        )
+    elif role == "moderator":
+        return (
+            f'<div class="verdict-wrap">'
+            f'<div class="verdict-label">⚖️ &nbsp; Moderator Verdict</div>'
+            f'<div class="verdict-text">{safe}{cursor}</div>'
+            f'</div>'
+        )
+    return ""
 
 
-def render_debate_columns(messages: list[dict], pro_name: str, con_name: str) -> None:
-    """Render all debate messages in a side-by-side column layout."""
-    pro_msgs = [m for m in messages if m["speaker"] == "pro"]
-    con_msgs = [m for m in messages if m["speaker"] == "con"]
-    verdict = next((m for m in messages if m["speaker"] == "moderator"), None)
+def round_divider_html(n: int) -> str:
+    return f'<div class="round-divider">Round {n}</div>'
 
-    col_pro, col_con = st.columns(2, gap="large")
 
-    with col_pro:
-        st.markdown(f"""
-        <div class="col-header col-header-pro">
-          <div class="col-dot"></div>
-          <div>
-            <div class="col-role">Pro</div>
-            <div class="col-name">{_e(pro_name)}</div>
-          </div>
-        </div>
-        """, unsafe_allow_html=True)
-        for i, msg in enumerate(pro_msgs, start=1):
-            render_arg_card(msg["content"], "pro", i)
-
-    with col_con:
-        st.markdown(f"""
-        <div class="col-header col-header-con">
-          <div class="col-dot"></div>
-          <div>
-            <div class="col-role">Con</div>
-            <div class="col-name">{_e(con_name)}</div>
-          </div>
-        </div>
-        """, unsafe_allow_html=True)
-        for i, msg in enumerate(con_msgs, start=1):
-            render_arg_card(msg["content"], "con", i)
-
-    if verdict:
-        safe_v = _e(verdict["content"]).replace("\n", "<br>")
-        st.markdown(f"""
-        <div class="verdict-block">
-          <div class="verdict-label">⚖️ &nbsp; Moderator Verdict</div>
-          <div class="verdict-text">{safe_v}</div>
-        </div>
-        """, unsafe_allow_html=True)
+def render_history(messages: list[dict]) -> None:
+    """Replay stored messages (non-streaming)."""
+    last_round = 0
+    for msg in messages:
+        r = msg.get("round", 0)
+        if msg["speaker"] != "moderator" and r != last_round:
+            st.markdown(round_divider_html(r), unsafe_allow_html=True)
+            last_round = r
+        st.markdown(bubble_html(msg["content"], msg["speaker"], msg.get("persona", "")), unsafe_allow_html=True)
 
 
 # ----------------------------
-# Sidebar — block 1: controls
+# Sidebar — block 1
 # ----------------------------
 with st.sidebar:
-    st.markdown('<div style="font-size:0.95rem;font-weight:700;color:#e0e0e0;padding:0.25rem 0 1rem;">AI Debate Club</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sidebar-section-label">Rounds</div>', unsafe_allow_html=True)
+    st.markdown('<div style="font-size:0.9rem;font-weight:700;color:#e0e0e0;padding:0.25rem 0 0.75rem;">AI Debate Club</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sb-label">Rounds</div>', unsafe_allow_html=True)
     max_rounds = st.slider("Rounds", min_value=1, max_value=10, value=3, label_visibility="collapsed")
-    st.markdown('<div class="sidebar-section-label">About</div>', unsafe_allow_html=True)
-    st.markdown('<div style="font-size:0.78rem;color:#5a5a5a;line-height:1.65;">Two AI agents argue opposite sides of a topic in persona, then a neutral moderator evaluates and declares a winner.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sb-label">About</div>', unsafe_allow_html=True)
+    st.markdown('<div style="font-size:0.75rem;color:#5a5a5a;line-height:1.6;">Two AI agents debate in persona, then a neutral moderator evaluates and declares a winner.</div>', unsafe_allow_html=True)
 
 
 # ----------------------------
@@ -339,10 +299,10 @@ topic = st.text_input(
 
 col_p, col_c = st.columns(2, gap="large")
 with col_p:
-    st.markdown('<div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#4f8ef7;margin-bottom:4px;">PRO persona</div>', unsafe_allow_html=True)
+    st.markdown('<div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#4f8ef7;margin-bottom:4px;">PRO persona</div>', unsafe_allow_html=True)
     pro_persona = st.text_input("Pro persona", value="Donald Trump", label_visibility="collapsed")
 with col_c:
-    st.markdown('<div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#e05555;margin-bottom:4px;">CON persona</div>', unsafe_allow_html=True)
+    st.markdown('<div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#e05555;margin-bottom:4px;">CON persona</div>', unsafe_allow_html=True)
     con_persona = st.text_input("Con persona", value="Dwayne Johnson (The Rock)", label_visibility="collapsed")
 
 start = st.button("Start Debate", type="primary", use_container_width=True)
@@ -351,15 +311,15 @@ start = st.button("Start Debate", type="primary", use_container_width=True)
 # Sidebar — block 2: live persona cards
 # ----------------------------
 with st.sidebar:
-    st.markdown('<div class="sidebar-section-label">Debaters</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sb-label">Debaters</div>', unsafe_allow_html=True)
     st.markdown(f"""
-    <div class="side-card side-card-pro">
-      <div class="side-role">Pro</div>
-      <div class="side-name">{_e(pro_persona or "Pro")}</div>
+    <div class="sb-card sb-card-pro">
+      <div class="sb-role">Pro</div>
+      <div class="sb-name">{_e(pro_persona or "Pro")}</div>
     </div>
-    <div class="side-card side-card-con">
-      <div class="side-role">Con</div>
-      <div class="side-name">{_e(con_persona or "Con")}</div>
+    <div class="sb-card sb-card-con">
+      <div class="sb-role">Con</div>
+      <div class="sb-name">{_e(con_persona or "Con")}</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -374,15 +334,9 @@ if "debate_personas" not in st.session_state:
 
 
 # ----------------------------
-# Debate runner
+# Debate runner — streams tokens live
 # ----------------------------
-def run_real_debate(
-    topic: str,
-    max_rounds: int,
-    pro_persona: str,
-    con_persona: str,
-    debate_view: st.delta_generator.DeltaGenerator,
-) -> bool:
+def run_real_debate(topic: str, max_rounds: int, pro_persona: str, con_persona: str) -> bool:
     try:
         from graph import graph_app
     except Exception as e:
@@ -392,8 +346,8 @@ def run_real_debate(
     persona_pro = (pro_persona or "").strip() or "Pro"
     persona_con = (con_persona or "").strip() or "Con"
 
-    st.session_state.debate_personas = {"pro": persona_pro, "con": persona_con}
     st.session_state.chat_messages = []
+    st.session_state.debate_personas = {"pro": persona_pro, "con": persona_con}
 
     state = {
         "topic": topic,
@@ -407,55 +361,80 @@ def run_real_debate(
         "con_persona": persona_con,
     }
 
-    prev_pro = ""
-    prev_con = ""
-    last_round = -1
-
     progress_bar = st.progress(0)
-    status = st.empty()
+    status      = st.empty()
+
+    current_node  = None
+    current_text  = ""
+    current_ph    = None   # st.empty() for the active streaming bubble
+    pro_turn      = 0
+    con_turn      = 0
+
+    def finish_turn():
+        """Persist the completed turn to session state and finalize its placeholder."""
+        nonlocal current_text, current_ph
+        if not current_node or not current_text:
+            return
+        role = current_node
+        persona = persona_pro if role == "pro" else persona_con if role == "con" else ""
+        round_num = pro_turn if role == "pro" else con_turn
+        st.session_state.chat_messages.append({
+            "speaker": role,
+            "content": current_text,
+            "persona": persona,
+            "round": round_num,
+        })
+        if current_ph:
+            current_ph.markdown(bubble_html(current_text, role, persona, streaming=False), unsafe_allow_html=True)
 
     try:
-        for step in graph_app.stream(state, stream_mode="values"):
-            current_round = int(step.get("round", 0))
-            current_pro = step.get("pro_argument", "") or ""
-            current_con = step.get("con_argument", "") or ""
-            changed = False
+        for chunk, metadata in graph_app.stream(state, stream_mode="messages"):
+            node = metadata.get("langgraph_node", "")
+            if node not in ("pro", "con", "moderator"):
+                continue
+            if not isinstance(chunk, AIMessageChunk):
+                continue
+            token = chunk.content
+            if not isinstance(token, str) or not token:
+                continue
 
-            if current_round != last_round:
-                last_round = current_round
-                fraction = min(current_round / int(max_rounds), 1.0)
-                progress_bar.progress(fraction)
+            # ── Node transition ──────────────────────────────────────────
+            if node != current_node:
+                finish_turn()
 
-            if current_pro and current_pro != prev_pro:
-                status.markdown(f'<div class="status-bar">{_e(persona_pro)} is speaking...</div>', unsafe_allow_html=True)
-                prev_pro = current_pro
-                st.session_state.chat_messages.append({"speaker": "pro", "content": current_pro, "persona": persona_pro})
-                changed = True
+                current_node = node
+                current_text = ""
 
-            if current_con and current_con != prev_con:
-                status.markdown(f'<div class="status-bar">{_e(persona_con)} is speaking...</div>', unsafe_allow_html=True)
-                prev_con = current_con
-                st.session_state.chat_messages.append({"speaker": "con", "content": current_con, "persona": persona_con})
-                changed = True
+                if node == "pro":
+                    pro_turn += 1
+                    # Round divider before each new pro turn (except first)
+                    st.markdown(round_divider_html(pro_turn), unsafe_allow_html=True)
+                    progress_bar.progress(max((con_turn) / max_rounds, 0))
+                    status.markdown(f'<div class="status-line">{_e(persona_pro)} is speaking...</div>', unsafe_allow_html=True)
 
-            moderator_verdict = step.get("moderator_verdict")
-            if moderator_verdict and current_round >= int(max_rounds):
-                progress_bar.progress(1.0)
-                status.empty()
-                st.session_state.chat_messages.append({"speaker": "moderator", "content": moderator_verdict})
-                changed = True
+                elif node == "con":
+                    con_turn += 1
+                    status.markdown(f'<div class="status-line">{_e(persona_con)} is speaking...</div>', unsafe_allow_html=True)
 
-            if changed:
-                with debate_view.container():
-                    render_debate_columns(
-                        st.session_state.chat_messages,
-                        persona_pro,
-                        persona_con,
-                    )
+                elif node == "moderator":
+                    progress_bar.progress(1.0)
+                    status.markdown('<div class="status-line">Moderator is deliberating...</div>', unsafe_allow_html=True)
+                    st.markdown('<div style="margin-top:0.5rem;"></div>', unsafe_allow_html=True)
 
-            if moderator_verdict and current_round >= int(max_rounds):
-                st.toast("Debate complete.", icon="⚖️")
-                break
+                current_ph = st.empty()
+
+            # ── Stream token into placeholder ────────────────────────────
+            current_text += token
+            persona = persona_pro if current_node == "pro" else persona_con if current_node == "con" else ""
+            current_ph.markdown(
+                bubble_html(current_text, current_node, persona, streaming=True),
+                unsafe_allow_html=True,
+            )
+
+        # Finalize the last turn
+        finish_turn()
+        status.empty()
+        st.toast("Debate complete.", icon="⚖️")
 
     except Exception as e:
         st.error(f"Debate failed: {e}")
@@ -475,17 +454,11 @@ if topic:
     </div>
     """, unsafe_allow_html=True)
 
-debate_view = st.empty()
-
-# Replay previous debate if session has messages
+# Replay previous session
 if st.session_state.chat_messages:
-    with debate_view.container():
-        render_debate_columns(
-            st.session_state.chat_messages,
-            st.session_state.debate_personas["pro"],
-            st.session_state.debate_personas["con"],
-        )
+    render_history(
+        st.session_state.chat_messages,
+    )
 
 if start:
-    debate_view.empty()
-    run_real_debate(topic, max_rounds, pro_persona, con_persona, debate_view)
+    run_real_debate(topic, max_rounds, pro_persona, con_persona)
