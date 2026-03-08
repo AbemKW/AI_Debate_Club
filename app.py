@@ -15,7 +15,7 @@ import streamlit as st
 st.set_page_config(page_title="AI Debate Club", layout="wide", page_icon="⚖️")
 
 # ----------------------------
-# Global CSS
+# Global CSS + Auto-scroll JS
 # ----------------------------
 st.markdown("""
 <style>
@@ -215,6 +215,19 @@ html, body, .stApp,
 .stButton > button[kind="primary"]:hover { background: #3a78e0 !important; }
 .stProgress > div > div > div > div { background: var(--pro) !important; }
 </style>
+
+<script>
+(function() {
+  const target = document.querySelector('.stMain [role="main"]');
+  if (!target) return;
+  
+  const observer = new MutationObserver(() => {
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  });
+  
+  observer.observe(target, { childList: true, subtree: true });
+})();
+</script>
 """, unsafe_allow_html=True)
 
 
